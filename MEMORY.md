@@ -123,6 +123,29 @@ src/
   - **商用级打磨**：CSS 动效优化(更快的 fadeIn/slideIn)、tab 加 whitespace-nowrap、按钮触控反馈、iOS 防缩放、iPhone 安全区域支持
   - **MeasurementsPage 移动端卡片布局**：手机端每个字段带标签的卡片式布局
 
+### 2026-06-11 对话 4
+- **用户诉求**：修复预算管理逻辑问题、软装清单所属空间英文下拉、已支出逻辑错误；创建 git-push-deploy Skill；重构预算管理为专业模式；修复添加物品建议逻辑；预填软装物品数据；全面审查系统体验
+- **已完成**：
+  - **FormField 支持 SelectOption**：所属空间下拉显示中文，值为英文ID
+  - **FurnishingItem 添加 actualPrice 字段**：已购/已安装时需填写实际价格
+  - **BudgetPage 预算管理重构**：
+    - 用户可设定软装总预算（默认20万，可编辑）
+    - 预算分配 = 各物品预算区间之和，带分配率进度条
+    - 已支出 = 有实际价格用实际价格，没填回退到预算上限
+    - 剩余预算 = 总预算 - 已支出
+    - 空间柱状图改为"预算 vs 实际"双柱对比
+  - **git-push-deploy Skill 创建**：`.trae/skills/git-push-deploy/SKILL.md`，自动化提交推送部署流程
+  - **AddItemForm 品类建议重构**：按空间推荐品类（玄关→鞋柜/穿衣镜、客餐厅→沙发/茶几/餐桌、主卧→床/床垫/窗帘等），切换空间自动调整默认品类，动态 placeholder
+  - **预填28项软装物品**：基于143㎡精装交付标准，覆盖6个空间28项物品，带合理预算区间和材质要求
+  - **Dashboard 优化**：软装清单卡片改为进度百分比、预算卡片使用新逻辑、移除名言引用区块
+- **用户习惯**：
+  - **标准流程**：本地运行验证 → push 到 git → 自动部署到网站，每次都是这样
+  - **无需每次重复描述部署流程**
+  - 用户裁量权很大，希望功能实际落地而非为做而做
+  - 参考文档：嘉伟产品严选精粹、避坑宝典系列（飞书/腾讯文档，需登录访问）
+- **未完成**：
+  - GitHub push 因网络超时未成功，需用户手动在非沙箱终端执行 `git push origin main`
+
 ## 已部署信息
 
 | 项目 | 值 |
@@ -156,6 +179,13 @@ src/
 - [x] 响应式适配细节优化
 - [x] 配色提亮（暖炭色系替代深炭色系）
 - [x] 移动端体验优化（底部导航、全屏面板、触控目标、iPhone适配）
+- [x] 修复预算管理逻辑（自上而下分配模式）
+- [x] 修复所属空间下拉英文问题
+- [x] 修复已支出逻辑（actualPrice 字段）
+- [x] 创建 git-push-deploy Skill
+- [x] AddItemForm 按空间推荐品类
+- [x] 预填28项软装物品数据
+- [x] Dashboard 概览数据优化
 - [ ] 用户实际使用后根据反馈迭代
 
 ## 重要参考文件
@@ -164,6 +194,44 @@ src/
 - `.trae/documents/TechnicalArchitecture.md` - 技术架构文档
 - `大连中天央著精装标准调研.md` - 精装标准调研（详细品牌/材质/色系信息）
 - `反面废案.html` - 反面参考（审美低劣、调研不详细）
+
+## Git 推送操作指南（重要）
+
+### 问题背景
+本机有两个 Git 账号：
+- **全局配置**（另一个项目）：wangjingbo / jingbo.wang@dhc.com.cn，使用 Windows 凭证管理器缓存了 GitHub 登录
+- **本项目本地配置**：asa615293-create / asa615293@gmail.com
+
+### 推送会失败的原因
+终端沙箱网络不稳定（SSL 连接超时），且 Windows 凭证管理器缓存了旧账号凭证，直接推送会用错误账号认证失败。
+
+### 正确推送方式
+**必须由用户在自己的终端（非 Trae 终端）执行：**
+
+```powershell
+cd "C:\Users\Administrator\Desktop\装\中天央著装修方案"
+git push origin main
+```
+
+### 如果遇到认证失败
+两种解决方式：
+
+**方式A：清除旧凭证**
+1. 控制面板 → 凭据管理器 → Windows 凭据
+2. 找到所有 `github.com` 条目，全部删除
+3. 重新执行 `git push`，会弹出浏览器登录
+
+**方式B：用 Personal Access Token**
+1. 打开 https://github.com/settings/tokens?type=beta
+2. 生成 token，权限勾选 Contents 的 Read and write
+3. 执行：
+```powershell
+git remote set-url origin https://asa615293-create:你的token@github.com/asa615293-create/zhongtian-yangzhu.git
+git push origin main
+```
+
+### Railway 自动部署
+推送到 GitHub 后，Railway 会自动重新部署，无需手动操作。约2-3分钟生效。
 
 ## 启动方式
 
