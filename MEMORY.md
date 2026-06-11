@@ -13,7 +13,7 @@
 | 户型 | 143㎡ 三室三卫（边户），合同面积 142.31㎡ |
 | 楼层 | 5楼 |
 | 总房款 | 3,823,301 元 |
-| 定金 | 100,000 元（2026-06-07 缴纳） |
+| 定金 | 100,000 元（2026-06-09 缴纳） |
 | 交房日期 | 2026-12-31 |
 | 交付标准 | 精装修 |
 | 特点 | 一梯一户、270°环幕、超大窗墙比 |
@@ -41,7 +41,7 @@
 - **用途**：精装房软装需求设计书（Soft Furnishing FS）
 - **核心场景**：①记录房屋参数与实景 ②整理软装需求 ③设计方案展示 ④交付软装团队执行 ⑤案例展示
 - **审美要求**：企业级、高级、大气，禁止网红风/小红书卖货风/二流装修公司问卷风
-- **技术方案**：React + TypeScript + Vite + Tailwind CSS + Zustand，纯前端 localStorage 持久化
+- **技术方案**：React + TypeScript + Vite + Tailwind CSS + Zustand + Express 后端，服务端 data.json 持久化，自动保存（1秒防抖）
 - **设计风格**：隐奢建筑事务所风格，深色主题 + 香槟金点缀
 
 ## 技术架构概要
@@ -98,6 +98,34 @@ src/
 - **当前状态**：代码已完成，需用户手动运行 `npm install` + `npm run dev` 启动项目（终端沙箱权限限制）
 - **备注**：用户提供了反面废案（反面废案.html）作为审美参考的反面教材；已有详细精装标准调研文档（大连中天央著精装标准调研.md）
 
+### 2026-06-11 对话 2
+- **用户诉求**：将项目部署到云端，实现任何设备访问、数据云端同步
+- **已完成**：
+  - 调研部署平台（Railway/Zeabur/Koyeb/国内云平台）
+  - 新增 Express 后端（server/index.js），数据存储为 data.json
+  - 改造前端 store：localStorage 替换为 API 调用 + 1秒防抖自动保存
+  - 新增 Dockerfile 支持 Docker 部署
+  - 服务端同时托管前端静态文件（单服务部署）
+  - 本地构建验证通过
+  - Git 初始化并提交，推送到 GitHub
+  - Railway 部署成功并验证通过
+- **部署平台**：Railway Trial（不绑卡，30天$5额度）；Zeabur 待用户后续尝试
+- **Git 账号**：asa615293-create / asa615293@gmail.com（本项目本地 git config，不影响全局）
+
+## 已部署信息
+
+| 项目 | 值 |
+|------|-----|
+| GitHub 仓库 | https://github.com/asa615293-create/zhongtian-yangzhu |
+| Railway 线上地址 | https://zhongtian-yangzhu-production.up.railway.app/ |
+| API 健康检查 | https://zhongtian-yangzhu-production.up.railway.app/api/health |
+| 数据下载（备份） | https://zhongtian-yangzhu-production.up.railway.app/api/data |
+| Railway 后台 | https://railway.app/dashboard |
+| Zeabur 后台 | https://dash.zeabur.com |
+| 数据同步机制 | 修改后1秒自动保存到服务器，刷新页面即同步，非实时推送 |
+| 本地 Git 用户 | asa615293-create / asa615293@gmail.com（仅本项目） |
+| Railway Trial 额度 | $5 一次性，约可用30天，到期后需升级 Hobby（$5/月）或迁移 Zeabur |
+
 ## 待办事项
 
 - [x] 用户确认 PRD 和技术架构文档
@@ -107,8 +135,13 @@ src/
 - [x] 实现设计方案模块
 - [x] 实现预算总览模块
 - [x] 实现概览仪表盘
-- [ ] npm install 安装依赖
-- [ ] 启动开发服务器验证
+- [x] 添加 Express 后端 + API 数据持久化
+- [x] 前端 localStorage 替换为 API 调用 + 自动保存
+- [x] Dockerfile 部署配置
+- [x] 推送代码到 GitHub
+- [x] Railway 部署上线
+- [ ] Zeabur 部署（用户后续可自行尝试）
+- [ ] 一键备份/恢复数据功能
 - [ ] 响应式适配细节优化
 - [ ] 用户实际使用后根据反馈迭代
 
@@ -121,11 +154,29 @@ src/
 
 ## 启动方式
 
+### 本地开发（前后端分离）
 ```bash
-cd d:\中天央著装修方案
-npm install
-npm run dev
+# 终端1：启动后端
+cd server && npm install && node index.js
+
+# 终端2：启动前端（自动代理 /api 到后端）
+npm install && npm run dev
 ```
+
+### 生产部署（Docker 单服务）
+```bash
+# Docker 构建并运行
+docker build -t zhongtian-yangzhu .
+docker run -p 3001:3001 -v data:/app/server zhongtian-yangzhu
+```
+
+### 部署平台
+- **Railway**：连接 GitHub 仓库，自动识别 Dockerfile 部署
+- **Zeabur**：连接 GitHub 仓库，自动识别 Dockerfile 部署
+
+### 数据备份
+- 浏览器访问 `https://zhongtian-yangzhu-production.up.railway.app/api/data` 可下载全部数据 JSON
+- 页面内已有"导出数据"功能，可下载备份文件
 
 ---
 

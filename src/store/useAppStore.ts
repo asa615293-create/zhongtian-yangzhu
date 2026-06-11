@@ -94,7 +94,7 @@ const defaultProperty: PropertyInfo = {
   floor: '5楼',
   totalPrice: 3823301,
   deposit: 100000,
-  depositDate: '2026-06-07',
+  depositDate: '2026-06-09',
   deliveryDate: '2026-12-31',
   deliveryStandard: '精装修',
   privateElevator: true,
