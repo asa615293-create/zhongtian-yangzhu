@@ -1,0 +1,190 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * {
+    box-sizing: border-box;
+  }
+
+  html {
+    scroll-behavior: smooth;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    @apply bg-bg-primary text-text-primary font-body;
+    margin: 0;
+    padding: 0;
+    min-height: 100vh;
+  }
+
+  ::selection {
+    background: rgba(196, 162, 101, 0.3);
+    color: #F5F0EB;
+  }
+
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: #2C2C2E;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: #48484A;
+    border-radius: 3px;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: #5A5A5C;
+  }
+
+  input, textarea, select {
+    @apply bg-bg-secondary text-text-primary border border-border-subtle rounded-lg;
+    @apply px-3 py-2 text-sm font-body outline-none;
+    @apply transition-all duration-200;
+    @apply placeholder:text-text-muted;
+  }
+
+  input:focus, textarea:focus, select:focus {
+    @apply border-accent/50 ring-1 ring-accent/20;
+  }
+
+  textarea {
+    resize: vertical;
+    min-height: 80px;
+  }
+}
+
+@layer components {
+  .card {
+    @apply bg-bg-secondary border border-border-subtle rounded-xl p-5;
+    @apply transition-all duration-200;
+  }
+
+  .card-hover:hover {
+    @apply bg-bg-card -translate-y-0.5;
+    @apply shadow-lg shadow-black/20;
+  }
+
+  .section-title {
+    @apply text-lg font-display font-semibold text-text-primary tracking-wide;
+  }
+
+  .section-subtitle {
+    @apply text-sm text-text-secondary font-body;
+  }
+
+  .gold-divider {
+    @apply h-px bg-gradient-to-r from-transparent via-accent/30 to-transparent;
+  }
+
+  .badge {
+    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium;
+  }
+
+  .badge-must {
+    @apply badge bg-error/15 text-error;
+  }
+
+  .badge-recommended {
+    @apply badge bg-warning/15 text-warning;
+  }
+
+  .badge-optional {
+    @apply badge bg-accent-muted text-accent;
+  }
+
+  .badge-pending {
+    @apply badge bg-text-muted/15 text-text-muted;
+  }
+
+  .badge-selected {
+    @apply badge bg-accent-muted text-accent;
+  }
+
+  .badge-purchased {
+    @apply badge bg-success/15 text-success;
+  }
+
+  .badge-installed {
+    @apply badge bg-accent/20 text-accent;
+  }
+
+  .btn-primary {
+    @apply bg-accent text-bg-primary px-4 py-2 rounded-lg text-sm font-medium;
+    @apply hover:bg-accent-hover transition-all duration-200;
+    @apply active:scale-[0.98];
+  }
+
+  .btn-secondary {
+    @apply bg-bg-card text-text-primary px-4 py-2 rounded-lg text-sm font-medium;
+    @apply border border-border-subtle;
+    @apply hover:bg-bg-hover transition-all duration-200;
+    @apply active:scale-[0.98];
+  }
+
+  .btn-ghost {
+    @apply text-text-secondary px-4 py-2 rounded-lg text-sm font-medium;
+    @apply hover:text-text-primary hover:bg-bg-card;
+    @apply transition-all duration-200;
+  }
+
+  .nav-item {
+    @apply flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm;
+    @apply text-text-secondary hover:text-text-primary hover:bg-bg-card;
+    @apply transition-all duration-200 cursor-pointer;
+  }
+
+  .nav-item-active {
+    @apply nav-item text-accent bg-accent-muted;
+  }
+
+  .form-label {
+    @apply block text-xs font-medium text-text-secondary mb-1.5 uppercase tracking-wider;
+  }
+
+  .form-group {
+    @apply mb-4;
+  }
+
+  .photo-upload-zone {
+    @apply border-2 border-dashed border-border-subtle rounded-xl p-6;
+    @apply flex flex-col items-center justify-center gap-2;
+    @apply text-text-muted text-sm;
+    @apply hover:border-accent/30 hover:text-text-secondary;
+    @apply transition-all duration-200 cursor-pointer;
+  }
+
+  .tab {
+    @apply px-4 py-2 text-sm font-medium rounded-lg;
+    @apply text-text-secondary hover:text-text-primary;
+    @apply transition-all duration-200 cursor-pointer;
+  }
+
+  .tab-active {
+    @apply tab bg-accent-muted text-accent;
+  }
+
+  .fade-in {
+    animation: fadeIn 0.3s ease-out;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .slide-in-right {
+    animation: slideInRight 0.3s ease-out;
+  }
+
+  @keyframes slideInRight {
+    from { opacity: 0; transform: translateX(20px); }
+    to { opacity: 1; transform: translateX(0); }
+  }
+}
