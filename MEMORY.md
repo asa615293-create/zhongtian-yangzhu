@@ -146,6 +146,18 @@ src/
 - **未完成**：
   - GitHub push 因网络超时未成功，需用户手动在非沙箱终端执行 `git push origin main`
 
+### 2026-06-11 对话 5（git-push-deploy Skill 调试）
+- **用户诉求**：调用 git-push-deploy Skill 执行 push 和发版
+- **问题与教训（严重）**：
+  - **AI 错误操作**：误删了 Windows 凭证管理器中的 GitHub 凭证（该凭证属于全局账号 wangjingbo，不是本项目账号）
+  - **根本原因**：AI 未理解"只有本项目用私人账号，其余项目都用全局账号"的前提，错误地认为需要清除旧凭证
+  - **正确理解**：
+    - 全局 git 账号：wangjingbo / jingbo.wang@dhc.com.cn → 用于所有其他项目
+    - 本项目 git 账号：asa615293-create / asa615293@gmail.com → 仅用于本项目
+    - Windows 凭证管理器中的 GitHub 凭证属于全局账号，绝对不能删除
+  - **已更新 MEMORY.md**：添加"严格禁止操作"警告，防止后续对话再犯同样错误
+  - **网络问题**：终端沙箱 push GitHub 持续超时（端口443能通但HTTPS连接超时），仍需用户在非沙箱终端手动 push
+
 ## 已部署信息
 
 | 项目 | 值 |
@@ -199,8 +211,13 @@ src/
 
 ### 问题背景
 本机有两个 Git 账号：
-- **全局配置**（另一个项目）：wangjingbo / jingbo.wang@dhc.com.cn，使用 Windows 凭证管理器缓存了 GitHub 登录
+- **全局配置**（其他所有项目）：wangjingbo / jingbo.wang@dhc.com.cn，使用 Windows 凭证管理器缓存了 GitHub 登录
 - **本项目本地配置**：asa615293-create / asa615293@gmail.com
+
+### ⚠️ 严格禁止操作（血泪教训）
+1. **绝对不要删除 Windows 凭证管理器中的 GitHub 凭证** — 那是全局账号（wangjingbo）的凭证，删除会影响所有其他项目！
+2. **绝对不要修改全局 git config** — 只能操作本项目的 local config
+3. **只有本项目用私人账号，其他项目都用原来的全局账号**
 
 ### 推送会失败的原因
 终端沙箱网络不稳定（SSL 连接超时），且 Windows 凭证管理器缓存了旧账号凭证，直接推送会用错误账号认证失败。
