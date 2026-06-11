@@ -182,21 +182,21 @@ const SystemsPage: React.FC = () => {
                           value={spec?.brand || ''}
                           onChange={(e) => handleSubFieldChange(field.key, field.label, category.name, 'brand', e.target.value)}
                           placeholder="品牌"
-                          className="form-input w-full text-xs py-1 px-2"
+                          className="form-input w-full text-xs py-1.5 md:py-1 px-2"
                         />
                         <input
                           type="text"
                           value={spec?.model || ''}
                           onChange={(e) => handleSubFieldChange(field.key, field.label, category.name, 'model', e.target.value)}
                           placeholder="型号"
-                          className="form-input w-full text-xs py-1 px-2"
+                          className="form-input w-full text-xs py-1.5 md:py-1 px-2"
                         />
                         <input
                           type="text"
                           value={spec?.colorCode || ''}
                           onChange={(e) => handleSubFieldChange(field.key, field.label, category.name, 'colorCode', e.target.value)}
                           placeholder="色号"
-                          className="form-input w-full text-xs py-1 px-2"
+                          className="form-input w-full text-xs py-1.5 md:py-1 px-2"
                         />
                       </div>
                     </div>

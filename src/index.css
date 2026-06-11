@@ -31,16 +31,16 @@
   }
 
   ::-webkit-scrollbar-track {
-    background: #2C2C2E;
+    background: #363230;
   }
 
   ::-webkit-scrollbar-thumb {
-    background: #48484A;
+    background: #514D49;
     border-radius: 3px;
   }
 
   ::-webkit-scrollbar-thumb:hover {
-    background: #5A5A5C;
+    background: #5E5A55;
   }
 
   input, textarea, select {
@@ -186,5 +186,53 @@
   @keyframes slideInRight {
     from { opacity: 0; transform: translateX(20px); }
     to { opacity: 1; transform: translateX(0); }
+  }
+}
+
+/* ─── Mobile-specific optimizations ─────────────────────────────────────────── */
+@layer utilities {
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+/* Safe area support for iPhone notch */
+@supports (padding-bottom: env(safe-area-inset-bottom)) {
+  .safe-bottom {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+}
+
+/* Mobile touch improvements */
+@media (max-width: 1023px) {
+  /* Larger touch targets for inputs */
+  input, textarea, select {
+    @apply py-2.5;
+    font-size: 16px; /* Prevents iOS zoom on focus */
+  }
+
+  /* Better tap feedback */
+  .btn-primary, .btn-secondary, .btn-ghost {
+    @apply py-2.5;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  /* Room tabs larger touch area */
+  .tab, .tab-active {
+    @apply py-3 px-5;
+  }
+
+  /* Card tap feedback */
+  .card-hover:active {
+    @apply bg-bg-card scale-[0.98];
+  }
+
+  /* Nav items larger touch area */
+  .nav-item, .nav-item-active {
+    @apply py-3;
   }
 }

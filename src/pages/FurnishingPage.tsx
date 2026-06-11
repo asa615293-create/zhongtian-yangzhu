@@ -72,10 +72,11 @@ const FurnishingPage: React.FC = () => {
           <h1 className="section-title">软装清单</h1>
           <button
             onClick={() => setShowAddForm(true)}
-            className="btn-primary ml-auto flex items-center gap-1.5"
+            className="btn-primary ml-auto flex items-center gap-1.5 py-2.5 md:py-2"
           >
             <Plus className="w-4 h-4" />
-            添加物品
+            <span className="hidden sm:inline">添加物品</span>
+            <span className="sm:hidden">添加</span>
           </button>
         </div>
         <p className="section-subtitle ml-9">按空间管理需置办物品</p>

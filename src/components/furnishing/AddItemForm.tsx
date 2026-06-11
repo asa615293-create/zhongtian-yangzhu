@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X } from 'lucide-react';
+import { X, ChevronLeft } from 'lucide-react';
 import { useAppStore } from '@/store/useAppStore';
 import type { FurnishingItem } from '@/types';
 
@@ -37,6 +37,7 @@ const AddItemForm: React.FC<AddItemFormProps> = ({ roomId, onClose }) => {
       brandPreference: '',
       budgetMin: null,
       budgetMax: null,
+      actualPrice: null,
       priority: 'recommended',
       status: 'pending',
       matchingNotes: '',
@@ -49,27 +50,35 @@ const AddItemForm: React.FC<AddItemFormProps> = ({ roomId, onClose }) => {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+    <div className="fixed inset-0 z-50 flex items-end md:items-center justify-center">
       {/* Backdrop */}
       <div
         className="absolute inset-0 bg-black/60 backdrop-blur-sm"
         onClick={onClose}
       />
 
-      {/* Modal */}
-      <div className="relative w-full max-w-md bg-bg-secondary border border-border-subtle rounded-xl p-6 slide-in-right">
+      {/* Modal - bottom sheet on mobile, centered on desktop */}
+      <div className="relative w-full md:max-w-md bg-bg-secondary border-t md:border border-border-subtle rounded-t-2xl md:rounded-xl p-5 md:p-6 slide-in-right max-h-[85vh] md:max-h-none overflow-y-auto">
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
-          <h3 className="text-lg font-display font-semibold text-text-primary">添加物品</h3>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={onClose}
+              className="p-2 -ml-2 rounded-lg text-text-muted hover:text-text-primary hover:bg-bg-card transition-colors md:hidden"
+            >
+              <ChevronLeft size={22} />
+            </button>
+            <h3 className="text-lg font-display font-semibold text-text-primary">添加物品</h3>
+          </div>
           <button
             onClick={onClose}
-            className="p-1.5 rounded-lg text-text-muted hover:text-text-primary hover:bg-bg-card transition-colors"
+            className="p-1.5 rounded-lg text-text-muted hover:text-text-primary hover:bg-bg-card transition-colors hidden md:block"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-5">
           {/* Name */}
           <div className="form-group">
             <label className="form-label">物品名称 *</label>
@@ -116,14 +125,14 @@ const AddItemForm: React.FC<AddItemFormProps> = ({ roomId, onClose }) => {
             <button
               type="button"
               onClick={onClose}
-              className="btn-secondary flex-1"
+              className="btn-secondary flex-1 py-3 md:py-2"
             >
               取消
             </button>
             <button
               type="submit"
               disabled={!name.trim()}
-              className="btn-primary flex-1 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="btn-primary flex-1 py-3 md:py-2 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               添加
             </button>

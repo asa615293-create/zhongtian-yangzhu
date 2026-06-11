@@ -133,8 +133,8 @@ const MeasurementsPage: React.FC = () => {
           </button>
         </div>
 
-        {/* Table Header */}
-        <div className="grid grid-cols-12 gap-2 mb-2 px-2">
+        {/* Table Header - hidden on mobile */}
+        <div className="hidden md:grid grid-cols-12 gap-2 mb-2 px-2">
           <div className="col-span-3 text-xs font-medium text-text-muted uppercase tracking-wider">墙面名称</div>
           <div className="col-span-2 text-xs font-medium text-text-muted uppercase tracking-wider">宽度(mm)</div>
           <div className="col-span-2 text-xs font-medium text-text-muted uppercase tracking-wider">高度(mm)</div>
@@ -142,14 +142,75 @@ const MeasurementsPage: React.FC = () => {
           <div className="col-span-1" />
         </div>
 
-        {/* Table Rows */}
-        <div className="space-y-2">
+        {/* Table Rows - card style on mobile, row style on desktop */}
+        <div className="space-y-2 md:space-y-2">
           {roomMeasurements.map((m) => (
             <div
               key={m.id}
-              className="grid grid-cols-12 gap-2 items-center p-2 rounded-lg bg-bg-primary/50"
+              className="md:grid grid-cols-12 gap-2 items-center p-3 md:p-2 rounded-lg bg-bg-primary/50"
             >
-              <div className="col-span-3">
+              {/* Mobile layout */}
+              <div className="md:hidden space-y-2">
+                <div className="grid grid-cols-2 gap-2">
+                  <div>
+                    <label className="text-[10px] text-text-muted uppercase tracking-wider">墙面名称</label>
+                    <input
+                      type="text"
+                      value={m.wallName}
+                      onChange={(e) => handleFieldUpdate(m.id, 'wallName', e.target.value)}
+                      placeholder="如：南墙"
+                      className="form-input w-full text-sm"
+                    />
+                  </div>
+                  <div className="flex items-end">
+                    <button
+                      onClick={() => handleDeleteRow(m.id)}
+                      className="p-2.5 rounded-lg text-text-muted hover:text-red-400 hover:bg-red-400/10 transition-colors ml-auto"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-2">
+                  <div>
+                    <label className="text-[10px] text-text-muted uppercase tracking-wider">宽度(mm)</label>
+                    <input
+                      type="number"
+                      value={m.width ?? ''}
+                      onChange={(e) =>
+                        handleFieldUpdate(m.id, 'width', e.target.value ? Number(e.target.value) : null)
+                      }
+                      placeholder="0"
+                      className="form-input w-full text-sm"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-[10px] text-text-muted uppercase tracking-wider">高度(mm)</label>
+                    <input
+                      type="number"
+                      value={m.height ?? ''}
+                      onChange={(e) =>
+                        handleFieldUpdate(m.id, 'height', e.target.value ? Number(e.target.value) : null)
+                      }
+                      placeholder="0"
+                      className="form-input w-full text-sm"
+                    />
+                  </div>
+                </div>
+                <div>
+                  <label className="text-[10px] text-text-muted uppercase tracking-wider">备注</label>
+                  <input
+                    type="text"
+                    value={m.notes}
+                    onChange={(e) => handleFieldUpdate(m.id, 'notes', e.target.value)}
+                    placeholder="备注"
+                    className="form-input w-full text-sm"
+                  />
+                </div>
+              </div>
+
+              {/* Desktop layout */}
+              <div className="hidden md:block col-span-3">
                 <input
                   type="text"
                   value={m.wallName}
@@ -158,7 +219,7 @@ const MeasurementsPage: React.FC = () => {
                   className="form-input w-full text-sm"
                 />
               </div>
-              <div className="col-span-2">
+              <div className="hidden md:block col-span-2">
                 <input
                   type="number"
                   value={m.width ?? ''}
@@ -169,7 +230,7 @@ const MeasurementsPage: React.FC = () => {
                   className="form-input w-full text-sm"
                 />
               </div>
-              <div className="col-span-2">
+              <div className="hidden md:block col-span-2">
                 <input
                   type="number"
                   value={m.height ?? ''}
@@ -180,7 +241,7 @@ const MeasurementsPage: React.FC = () => {
                   className="form-input w-full text-sm"
                 />
               </div>
-              <div className="col-span-4">
+              <div className="hidden md:block col-span-4">
                 <input
                   type="text"
                   value={m.notes}
@@ -189,7 +250,7 @@ const MeasurementsPage: React.FC = () => {
                   className="form-input w-full text-sm"
                 />
               </div>
-              <div className="col-span-1 flex justify-center">
+              <div className="hidden md:flex col-span-1 justify-center">
                 <button
                   onClick={() => handleDeleteRow(m.id)}
                   className="p-1.5 rounded-lg text-text-muted hover:text-red-400 hover:bg-red-400/10 transition-colors"

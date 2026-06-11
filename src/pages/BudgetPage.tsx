@@ -29,14 +29,14 @@ import Badge from '@/components/common/Badge';
 const CHART_COLORS = [
   '#C4A265', // accent - 香槟金
   '#5C4A3A', // brown - 深咖
-  '#B5B0A8', // 浅灰米
+  '#C4BDB4', // 浅灰米（提亮）
   '#8B7355', // 暖棕
   '#A08060', // 琥珀
-  '#6B5B4A', // 暗褐
-  '#D4B275', // accent-hover
   '#7A6A5A', // 灰棕
-  '#9C8C7C', // 暖灰
-  '#4A3A2A', // 深棕
+  '#D4B275', // accent-hover
+  '#918981', // 暖灰（提亮）
+  '#B0A89E', // 暖浅灰
+  '#6B5B4A', // 暗褐
 ];
 
 // ─── Helpers ────────────────────────────────────────────────────────────────────
@@ -122,7 +122,7 @@ const BudgetPage: React.FC = () => {
     const totalActual = furnishingItems.reduce(
       (sum, item) => {
         if (item.status === 'purchased' || item.status === 'installed') {
-          return sum + (item.budgetMax || 0);
+          return sum + (item.actualPrice ?? item.budgetMax ?? 0);
         }
         return sum;
       },
@@ -184,8 +184,8 @@ const BudgetPage: React.FC = () => {
           cmp = (a.budgetMax || 0) - (b.budgetMax || 0);
           break;
         case 'actualAmount':
-          cmp = (a.status === 'purchased' || a.status === 'installed' ? a.budgetMax || 0 : 0) -
-                (b.status === 'purchased' || b.status === 'installed' ? b.budgetMax || 0 : 0);
+          cmp = (a.status === 'purchased' || a.status === 'installed' ? a.actualPrice ?? a.budgetMax ?? 0 : 0) -
+                (b.status === 'purchased' || b.status === 'installed' ? b.actualPrice ?? b.budgetMax ?? 0 : 0);
           break;
         case 'status': {
           const order: Record<FurnishingItem['status'], number> = {
@@ -217,7 +217,7 @@ const BudgetPage: React.FC = () => {
     const rows = furnishingItems.map((item) => {
       const roomName = rooms.find((r) => r.id === item.roomId)?.name || item.roomId;
       const actualAmount =
-        item.status === 'purchased' || item.status === 'installed' ? item.budgetMax || 0 : 0;
+        item.status === 'purchased' || item.status === 'installed' ? item.actualPrice ?? item.budgetMax ?? 0 : 0;
       return [
         item.name,
         roomName,
@@ -276,10 +276,11 @@ const BudgetPage: React.FC = () => {
           <h1 className="section-title">预算总览</h1>
           <button
             onClick={handleExportCSV}
-            className="btn-secondary ml-auto flex items-center gap-1.5 text-sm"
+            className="btn-secondary ml-auto flex items-center gap-1.5 text-sm py-2.5 md:py-2"
           >
             <Download className="w-4 h-4" />
-            导出预算表
+            <span className="hidden sm:inline">导出预算表</span>
+            <span className="sm:hidden">导出</span>
           </button>
         </div>
         <p className="section-subtitle ml-9">软装预算分配与支出追踪</p>
@@ -414,19 +415,19 @@ const BudgetPage: React.FC = () => {
                 layout="vertical"
                 margin={{ top: 0, right: 20, bottom: 0, left: 0 }}
               >
-                <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" horizontal={false} />
+                <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.06)" horizontal={false} />
                 <XAxis
                   type="number"
-                  tick={{ fill: '#6E6E73', fontSize: 11 }}
-                  axisLine={{ stroke: 'rgba(255,255,255,0.06)' }}
+                  tick={{ fill: '#918981', fontSize: 11 }}
+                  axisLine={{ stroke: 'rgba(255,255,255,0.08)' }}
                   tickFormatter={(v: number) => v >= 10000 ? `${(v / 10000).toFixed(0)}万` : `${v}`}
                 />
                 <YAxis
                   type="category"
                   dataKey="name"
                   width={60}
-                  tick={{ fill: '#A8A8AD', fontSize: 12 }}
-                  axisLine={{ stroke: 'rgba(255,255,255,0.06)' }}
+                  tick={{ fill: '#C4BDB4', fontSize: 12 }}
+                  axisLine={{ stroke: 'rgba(255,255,255,0.08)' }}
                 />
                 <Tooltip content={<CustomBarTooltip />} />
                 <Bar dataKey="value" radius={[0, 6, 6, 0]} barSize={20}>
@@ -478,7 +479,7 @@ const BudgetPage: React.FC = () => {
                     rooms.find((r) => r.id === item.roomId)?.name || item.roomId;
                   const actualAmount =
                     item.status === 'purchased' || item.status === 'installed'
-                      ? item.budgetMax || 0
+                      ? item.actualPrice ?? item.budgetMax ?? 0
                       : 0;
                   const budgetRange =
                     item.budgetMin && item.budgetMax

@@ -53,7 +53,7 @@
 - **图表**：Recharts
 - **图标**：Lucide React
 - **字体**：Cormorant Garamond（展示）+ DM Sans（界面）
-- **主题色**：深炭 #1C1C1E / 暖白 #F5F0EB / 香槟金 #C4A265 / 深咖 #5C4A3A
+- **主题色**：暖炭 #2A2725 / 暖白 #F5F0EB / 香槟金 #C4A265 / 深咖 #5C4A3A（从原深炭 #1C1C1E 提亮，保持隐奢质感）
 
 ## 项目文件结构
 
@@ -112,6 +112,18 @@ src/
 - **部署平台**：Railway Trial（不绑卡，30天$5额度）；Zeabur 待用户后续尝试
 - **Git 账号**：asa615293-create / asa615293@gmail.com（本项目本地 git config，不影响全局）
 
+### 2026-06-11 对话 3
+- **用户诉求**：整体配色偏暗感觉压抑需提亮；手机端使用体验需优化（主要使用场景在手机）
+- **已完成**：
+  - **配色提亮**：bg-primary #1C1C1E→#2A2725, bg-secondary #2C2C2E→#363230, bg-card #3A3A3C→#43403D, text-secondary #A8A8AD→#C4BDB4, text-muted #6E6E73→#918981, border-subtle 0.08→0.12, accent-muted 0.15→0.18，滚动条同步更新
+  - **移动端底部导航优化**：新增档案子页面展开导航（交付标准/实景照片/尺寸测量/三大件），加大触控区域 h-14→h-16，毛玻璃背景，安全区域支持
+  - **TopBar 移动端简化**：返回按钮+页面标题+导出按钮，隐藏保存按钮（已有自动保存），加大触控区域
+  - **ItemDetail 移动端全屏**：手机端全屏展示替代侧边面板，返回按钮，底部固定删除栏
+  - **AddItemForm 移动端底部弹出**：Bottom Sheet 设计替代居中弹窗，加大按钮触控区域
+  - **各页面移动端优化**：Dashboard 间距调整、FurnishingPage/BudgetPage 按钮文字响应式、MeasurementsPage 移动端卡片布局、DeliveryPage/SystemsPage 输入框加大
+  - **iPhone 适配**：viewport-fit=cover、safe-area-inset-bottom、theme-color、apple-mobile-web-app-capable、禁止缩放防 iOS 聚焦
+  - **图表颜色提亮**：BudgetPage 图表颜色和轴标签同步更新
+
 ## 已部署信息
 
 | 项目 | 值 |
@@ -142,7 +154,9 @@ src/
 - [x] Railway 部署上线
 - [ ] Zeabur 部署（用户后续可自行尝试）
 - [ ] 一键备份/恢复数据功能
-- [ ] 响应式适配细节优化
+- [x] 响应式适配细节优化
+- [x] 配色提亮（暖炭色系替代深炭色系）
+- [x] 移动端体验优化（底部导航、全屏面板、触控目标、iPhone适配）
 - [ ] 用户实际使用后根据反馈迭代
 
 ## 重要参考文件

@@ -1,15 +1,24 @@
 import React from 'react';
 
+interface SelectOption {
+  value: string;
+  label: string;
+}
+
 interface FormFieldProps {
   label: string;
   value: string;
   onChange: (value: string) => void;
   type?: 'text' | 'number' | 'select' | 'textarea';
   placeholder?: string;
-  options?: string[];
+  options?: string[] | SelectOption[];
   unit?: string;
   className?: string;
 }
+
+const isSelectOptionArray = (options: string[] | SelectOption[] | undefined): options is SelectOption[] => {
+  return Array.isArray(options) && options.length > 0 && typeof options[0] === 'object' && 'value' in options[0];
+};
 
 const FormField: React.FC<FormFieldProps> = ({
   label,
@@ -36,11 +45,17 @@ const FormField: React.FC<FormFieldProps> = ({
                 {placeholder}
               </option>
             )}
-            {options?.map((option) => (
-              <option key={option} value={option}>
-                {option}
-              </option>
-            ))}
+            {isSelectOptionArray(options)
+              ? options.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))
+              : options?.map((option) => (
+                <option key={option} value={option}>
+                  {option}
+                </option>
+              ))}
           </select>
         </div>
       ) : type === 'textarea' ? (

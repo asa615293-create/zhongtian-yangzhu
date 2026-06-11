@@ -65,6 +65,7 @@ export interface FurnishingItem {
   brandPreference: string;
   budgetMin: number | null;
   budgetMax: number | null;
+  actualPrice: number | null;
   priority: 'must' | 'recommended' | 'optional';
   status: 'pending' | 'selected' | 'purchased' | 'installed';
   matchingNotes: string;
