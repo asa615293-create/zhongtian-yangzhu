@@ -107,8 +107,8 @@ const MeasurementsPage: React.FC = () => {
       <div className="gold-divider mb-6" />
 
       {/* Room Tabs */}
-      <div className="mb-6 -mx-4 px-4 overflow-x-auto scrollbar-hide">
-        <div className="flex gap-2 min-w-max">
+      <div className="mb-6 overflow-x-auto scrollbar-hide">
+        <div className="flex gap-2 min-w-max pb-1">
           {rooms.map((room) => (
             <button
               key={room.id}

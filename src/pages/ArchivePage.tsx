@@ -1,8 +1,35 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Building2, Check, Minus, ArrowRight } from 'lucide-react';
+import { Building2, Check, Minus, ArrowRight, ClipboardList, Camera, Ruler, Wind } from 'lucide-react';
 import { useAppStore } from '@/store/useAppStore';
 import Card from '@/components/common/Card';
+
+const subPages = [
+  {
+    label: '精装交付标准',
+    description: '逐空间记录精装交付配置',
+    path: '/archive/delivery',
+    icon: ClipboardList,
+  },
+  {
+    label: '实景照片',
+    description: '按空间上传实景照片',
+    path: '/archive/photos',
+    icon: Camera,
+  },
+  {
+    label: '尺寸测量',
+    description: '记录各空间精确尺寸',
+    path: '/archive/measurements',
+    icon: Ruler,
+  },
+  {
+    label: '三大件与智能',
+    description: '空调/新风/地暖/智能系统',
+    path: '/archive/systems',
+    icon: Wind,
+  },
+];
 
 const ArchivePage: React.FC = () => {
   const property = useAppStore((s) => s.property);
@@ -47,38 +74,44 @@ const ArchivePage: React.FC = () => {
           <Building2 className="w-6 h-6 text-accent" />
           <h1 className="section-title">房屋档案</h1>
         </div>
-        <p className="section-subtitle ml-9">基础信息</p>
+        <p className="section-subtitle ml-9">基础信息与详细档案</p>
       </div>
 
       <div className="gold-divider mb-6" />
 
+      {/* Sub-page Navigation Cards - mobile-first */}
+      <div className="grid grid-cols-2 gap-3 mb-8">
+        {subPages.map((sub) => {
+          const Icon = sub.icon;
+          return (
+            <Card
+              key={sub.path}
+              hover
+              onClick={() => navigate(sub.path)}
+              className="flex flex-col items-center text-center py-5 px-3"
+            >
+              <div className="w-10 h-10 rounded-lg bg-accent-muted flex items-center justify-center mb-2.5">
+                <Icon className="w-5 h-5 text-accent" />
+              </div>
+              <h3 className="text-sm font-medium text-text-primary mb-1">{sub.label}</h3>
+              <p className="text-[11px] text-text-muted leading-tight">{sub.description}</p>
+            </Card>
+          );
+        })}
+      </div>
+
       {/* Info Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
         {infoItems.map((item) => (
           <Card key={item.label}>
-            <div className="space-y-2">
+            <div className="space-y-1.5">
               <label className="form-label">{item.label}</label>
-              <div className="text-lg text-text-primary">
+              <div className="text-base text-text-primary">
                 {item.isReact ? item.value : (item.value as string)}
               </div>
             </div>
           </Card>
         ))}
-      </div>
-
-      {/* Delivery Standard Link */}
-      <div className="mt-8">
-        <Card
-          hover
-          onClick={() => navigate('/archive/delivery')}
-          className="flex items-center justify-between"
-        >
-          <div>
-            <h3 className="text-text-primary font-medium">精装交付标准</h3>
-            <p className="text-sm text-text-muted mt-1">逐空间记录精装交付配置</p>
-          </div>
-          <ArrowRight className="w-5 h-5 text-text-muted" />
-        </Card>
       </div>
     </div>
   );

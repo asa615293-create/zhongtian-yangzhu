@@ -1,6 +1,5 @@
-import { useLocation, NavLink } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { Save, Download, ChevronLeft } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
 import { useAppStore } from '@/store/useAppStore';
 import { useState } from 'react';
 
@@ -23,8 +22,9 @@ export default function TopBar() {
   const [saveNotice, setSaveNotice] = useState(false);
 
   const currentLabel = routeLabels[location.pathname] || '概览';
+  const canGoBack = location.pathname !== '/';
 
-  // Build breadcrumb segments
+  // Build breadcrumb for desktop
   const segments = location.pathname.split('/').filter(Boolean);
   const breadcrumbs: { label: string; path: string }[] = [{ label: '概览', path: '/' }];
   let accumulated = '';
@@ -33,13 +33,6 @@ export default function TopBar() {
     const label = routeLabels[accumulated] || seg;
     breadcrumbs.push({ label, path: accumulated });
   }
-
-  const canGoBack = location.pathname !== '/';
-
-  const handleSave = () => {
-    setSaveNotice(true);
-    setTimeout(() => setSaveNotice(false), 2000);
-  };
 
   const handleExport = () => {
     const json = exportData();
@@ -56,34 +49,29 @@ export default function TopBar() {
 
   return (
     <header className="sticky top-0 z-20 bg-bg-secondary/80 backdrop-blur-md border-b border-border-subtle">
-      {/* Desktop breadcrumb layout */}
+      {/* Desktop breadcrumb */}
       <div className="hidden lg:flex items-center justify-between h-12 px-6">
         <div className="flex items-center gap-1.5 text-sm">
           {breadcrumbs.map((crumb, i) => (
             <span key={crumb.path} className="flex items-center gap-1.5">
               {i > 0 && <span className="text-text-muted">/</span>}
               {i < breadcrumbs.length - 1 ? (
-                <NavLink to={crumb.path} className="text-text-muted hover:text-text-secondary transition-colors">
+                <span
+                  onClick={() => navigate(crumb.path)}
+                  className="text-text-muted hover:text-text-secondary transition-colors cursor-pointer"
+                >
                   {crumb.label}
-                </NavLink>
+                </span>
               ) : (
                 <span className="text-text-primary font-medium">{crumb.label}</span>
               )}
             </span>
           ))}
         </div>
-
         <div className="flex items-center gap-2">
           {saveNotice && (
             <span className="text-xs text-accent animate-pulse mr-2">已保存</span>
           )}
-          <button
-            onClick={handleSave}
-            className="btn-ghost flex items-center gap-1.5 px-3 py-1.5 text-xs"
-          >
-            <Save size={14} />
-            <span>保存</span>
-          </button>
           <button
             onClick={handleExport}
             className="btn-ghost flex items-center gap-1.5 px-3 py-1.5 text-xs"
@@ -94,32 +82,22 @@ export default function TopBar() {
         </div>
       </div>
 
-      {/* Mobile layout - simplified */}
-      <div className="flex lg:hidden items-center justify-between h-12 px-3">
-        <div className="flex items-center gap-2 min-w-0 flex-1">
-          {canGoBack && (
-            <button
-              onClick={() => navigate(-1)}
-              className="p-2 -ml-1 rounded-lg text-text-secondary hover:text-text-primary hover:bg-bg-card transition-colors flex-shrink-0"
-            >
-              <ChevronLeft size={20} />
-            </button>
-          )}
-          <h1 className="text-sm font-medium text-text-primary truncate">{currentLabel}</h1>
-        </div>
-
-        <div className="flex items-center gap-1 flex-shrink-0">
-          {saveNotice && (
-            <span className="text-xs text-accent animate-pulse mr-1">已保存</span>
-          )}
+      {/* Mobile - back button + title */}
+      <div className="flex lg:hidden items-center h-12 px-2">
+        {canGoBack ? (
           <button
-            onClick={handleExport}
-            className="p-2.5 rounded-lg text-text-secondary hover:text-text-primary hover:bg-bg-card transition-colors"
-            title="导出数据"
+            onClick={() => navigate(-1)}
+            className="p-2.5 rounded-lg text-text-secondary hover:text-text-primary hover:bg-bg-card transition-colors -webkit-tap-highlight-color-transparent"
           >
-            <Download size={18} />
+            <ChevronLeft size={22} />
           </button>
-        </div>
+        ) : (
+          <div className="w-10" />
+        )}
+        <h1 className="flex-1 text-center text-sm font-medium text-text-primary truncate px-2">
+          {currentLabel}
+        </h1>
+        <div className="w-10" />
       </div>
     </header>
   );

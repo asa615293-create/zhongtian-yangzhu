@@ -41,6 +41,7 @@ interface AppData {
   furnishingItems: FurnishingItem[];
   designSchemes: DesignScheme[];
   budgetRecords: BudgetRecord[];
+  budgetTarget: number;
 }
 
 interface AppStore extends AppData {
@@ -78,6 +79,9 @@ interface AppStore extends AppData {
   updateBudgetRecord: (id: string, data: Partial<BudgetRecord>) => void;
   removeBudgetRecord: (id: string) => void;
 
+  // 软装总预算操作
+  updateBudgetTarget: (amount: number) => void;
+
   // 数据导入导出
   exportData: () => string;
   importData: (json: string) => void;
@@ -112,6 +116,7 @@ function triggerSave(state: AppData) {
     furnishingItems: state.furnishingItems,
     designSchemes: state.designSchemes,
     budgetRecords: state.budgetRecords,
+    budgetTarget: state.budgetTarget,
   };
   debouncedSave(data);
 }
@@ -126,6 +131,7 @@ export const useAppStore = create<AppStore>()((set, get) => ({
   furnishingItems: [],
   designSchemes: [],
   budgetRecords: [],
+  budgetTarget: 150000,
 
   // 从服务器加载数据
   loadFromServer: async () => {
@@ -143,6 +149,7 @@ export const useAppStore = create<AppStore>()((set, get) => ({
             furnishingItems: data.furnishingItems || [],
             designSchemes: data.designSchemes || [],
             budgetRecords: data.budgetRecords || [],
+            budgetTarget: data.budgetTarget || 150000,
             loaded: true,
           });
           return;
@@ -358,6 +365,13 @@ export const useAppStore = create<AppStore>()((set, get) => ({
       return next;
     }),
 
+  updateBudgetTarget: (amount) =>
+    set((state) => {
+      const next = { budgetTarget: amount };
+      triggerSave({ ...state, ...next });
+      return next;
+    }),
+
   // 数据导入导出
   exportData: () => {
     const state = get();
@@ -370,6 +384,7 @@ export const useAppStore = create<AppStore>()((set, get) => ({
       furnishingItems: state.furnishingItems,
       designSchemes: state.designSchemes,
       budgetRecords: state.budgetRecords,
+      budgetTarget: state.budgetTarget,
       exportDate: new Date().toISOString(),
       version: '1.0.0',
     };
@@ -388,6 +403,7 @@ export const useAppStore = create<AppStore>()((set, get) => ({
         furnishingItems: data.furnishingItems || [],
         designSchemes: data.designSchemes || [],
         budgetRecords: data.budgetRecords || [],
+        budgetTarget: data.budgetTarget || 150000,
       };
       set(next);
       triggerSave({ ...get(), ...next });

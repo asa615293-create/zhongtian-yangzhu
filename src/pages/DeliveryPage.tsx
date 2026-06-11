@@ -157,8 +157,8 @@ const DeliveryPage: React.FC = () => {
       <div className="gold-divider mb-6" />
 
       {/* Room Tabs */}
-      <div className="mb-6 -mx-4 px-4 overflow-x-auto scrollbar-hide">
-        <div className="flex gap-2 min-w-max">
+      <div className="mb-6 overflow-x-auto scrollbar-hide">
+        <div className="flex gap-2 min-w-max pb-1">
           {rooms.map((room) => (
             <button
               key={room.id}
@@ -179,11 +179,11 @@ const DeliveryPage: React.FC = () => {
             <Card key={category.name}>
               <h3 className="text-base font-semibold text-accent mb-4">{category.name}</h3>
               <div className="gold-divider mb-4" />
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-1">
+              <div className="space-y-4 md:grid md:grid-cols-2 md:gap-x-6 md:gap-y-1 md:space-y-0">
                 {category.fields.map((field) => {
                   const spec = getOrCreateSpec(field.key, field.label, category.name);
                   return (
-                    <div key={field.key} className="mb-2">
+                    <div key={field.key}>
                       <FormField
                         label={field.label}
                         value={spec?.value || ''}
@@ -193,28 +193,28 @@ const DeliveryPage: React.FC = () => {
                         options={field.options}
                         unit={field.unit}
                       />
-                      {/* Sub-fields: Brand / Model / Color Code */}
+                      {/* Sub-fields: Brand / Model / Color Code - stacked on mobile, 3-col on desktop */}
                       <div className="grid grid-cols-3 gap-2 mt-1">
                         <input
                           type="text"
                           value={spec?.brand || ''}
                           onChange={(e) => handleSubFieldChange(field.key, field.label, category.name, 'brand', e.target.value)}
                           placeholder="品牌"
-                          className="form-input w-full text-xs py-1.5 md:py-1 px-2"
+                          className="form-input w-full text-xs py-1 px-2"
                         />
                         <input
                           type="text"
                           value={spec?.model || ''}
                           onChange={(e) => handleSubFieldChange(field.key, field.label, category.name, 'model', e.target.value)}
                           placeholder="型号"
-                          className="form-input w-full text-xs py-1.5 md:py-1 px-2"
+                          className="form-input w-full text-xs py-1 px-2"
                         />
                         <input
                           type="text"
                           value={spec?.colorCode || ''}
                           onChange={(e) => handleSubFieldChange(field.key, field.label, category.name, 'colorCode', e.target.value)}
                           placeholder="色号"
-                          className="form-input w-full text-xs py-1.5 md:py-1 px-2"
+                          className="form-input w-full text-xs py-1 px-2"
                         />
                       </div>
                     </div>

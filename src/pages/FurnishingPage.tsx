@@ -72,11 +72,10 @@ const FurnishingPage: React.FC = () => {
           <h1 className="section-title">软装清单</h1>
           <button
             onClick={() => setShowAddForm(true)}
-            className="btn-primary ml-auto flex items-center gap-1.5 py-2.5 md:py-2"
+            className="btn-primary ml-auto flex items-center gap-1.5"
           >
             <Plus className="w-4 h-4" />
-            <span className="hidden sm:inline">添加物品</span>
-            <span className="sm:hidden">添加</span>
+            添加物品
           </button>
         </div>
         <p className="section-subtitle ml-9">按空间管理需置办物品</p>
@@ -85,8 +84,8 @@ const FurnishingPage: React.FC = () => {
       <div className="gold-divider mb-6" />
 
       {/* Room Tabs */}
-      <div className="mb-6 -mx-4 px-4 overflow-x-auto scrollbar-hide">
-        <div className="flex gap-2 min-w-max">
+      <div className="mb-6 overflow-x-auto scrollbar-hide">
+        <div className="flex gap-2 min-w-max pb-1">
           {rooms.map((room) => (
             <button
               key={room.id}

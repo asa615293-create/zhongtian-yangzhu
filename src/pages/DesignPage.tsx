@@ -439,8 +439,8 @@ const SpaceTab: React.FC = () => {
   return (
     <div className="fade-in space-y-6">
       {/* Room Tabs */}
-      <div className="-mx-4 px-4 overflow-x-auto scrollbar-hide">
-        <div className="flex gap-2 min-w-max">
+      <div className="overflow-x-auto scrollbar-hide">
+        <div className="flex gap-2 min-w-max pb-1">
           {rooms.map((room) => (
             <button
               key={room.id}
@@ -721,8 +721,8 @@ const DesignPage: React.FC = () => {
       <div className="gold-divider mb-6" />
 
       {/* Sub Tabs */}
-      <div className="mb-6 -mx-4 px-4 overflow-x-auto scrollbar-hide">
-        <div className="flex gap-2 min-w-max">
+      <div className="mb-6 overflow-x-auto scrollbar-hide">
+        <div className="flex gap-2 min-w-max pb-1">
           {tabs.map((tab) => (
             <button
               key={tab.key}

@@ -86,11 +86,11 @@ const Dashboard: React.FC = () => {
   return (
     <div className="fade-in space-y-10">
       {/* Hero Section */}
-      <div className="text-center py-6 md:py-12">
-        <h1 className="font-display text-3xl md:text-5xl text-accent tracking-wide mb-3">
+      <div className="text-center py-8 md:py-12">
+        <h1 className="font-display text-4xl md:text-5xl text-accent tracking-wide mb-3">
           中天·央著
         </h1>
-        <p className="text-base md:text-lg text-text-secondary tracking-widest mb-5">
+        <p className="text-lg text-text-secondary tracking-widest mb-6">
           软装需求设计书
         </p>
         <div className="gold-divider max-w-xs mx-auto mb-8" />
@@ -109,13 +109,13 @@ const Dashboard: React.FC = () => {
       <section>
         <h2 className="section-title mb-4">项目概览</h2>
         <div className="gold-divider mb-6" />
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {progressCards.map((card) => {
             const Icon = card.icon;
             return (
               <Link key={card.label} to={card.link}>
                 <Card hover className="border-t-2 border-accent/30 h-full">
-                  <div className="flex flex-col items-center text-center gap-2 py-1 md:py-2">
+                  <div className="flex flex-col items-center text-center gap-3 py-2">
                     <div className="w-10 h-10 rounded-lg bg-accent-muted flex items-center justify-center">
                       <Icon className="w-5 h-5 text-accent" />
                     </div>
@@ -138,12 +138,12 @@ const Dashboard: React.FC = () => {
       <section>
         <h2 className="section-title mb-4">快捷操作</h2>
         <div className="gold-divider mb-6" />
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {quickActions.map((action) => {
             const Icon = action.icon;
             return (
               <Link key={action.label} to={action.link}>
-                <button className="btn-secondary w-full flex items-center justify-center gap-2 py-3.5 md:py-3">
+                <button className="btn-secondary w-full flex items-center justify-center gap-2 py-3">
                   <Icon className="w-4 h-4 text-accent" />
                   <span className="text-sm">{action.label}</span>
                 </button>

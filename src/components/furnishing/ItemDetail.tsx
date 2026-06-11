@@ -121,7 +121,7 @@ const ItemDetail: React.FC<ItemDetailProps> = ({ item, onClose }) => {
       />
 
       {/* Panel - full screen on mobile, side panel on desktop */}
-      <div className="relative w-full md:w-[480px] h-full bg-bg-secondary border-l border-border-subtle slide-in-right flex flex-col md:absolute md:right-0 md:top-0 md:bottom-0">
+      <div className="relative w-full md:w-[480px] h-full bg-bg-secondary border-l border-border-subtle slide-in-right flex flex-col md:absolute md:right-0 md:top-0 md:bottom-0 md:rounded-l-xl">
         {/* Header */}
         <div className="flex items-center justify-between p-4 md:p-5 border-b border-border-subtle">
           <div className="flex items-center gap-2 min-w-0 flex-1">
@@ -144,7 +144,7 @@ const ItemDetail: React.FC<ItemDetailProps> = ({ item, onClose }) => {
         </div>
 
         {/* Scrollable Content */}
-        <div className="flex-1 overflow-y-auto p-4 md:p-5 space-y-6 pb-24 md:pb-6">
+        <div className="flex-1 overflow-y-auto p-4 md:p-5 space-y-6 pb-8 md:pb-6">
           {/* 基本信息 */}
           <section>
             <h4 className="text-sm font-semibold text-accent mb-3 uppercase tracking-wider">基本信息</h4>
@@ -365,7 +365,7 @@ const ItemDetail: React.FC<ItemDetailProps> = ({ item, onClose }) => {
           </section>
         </div>
 
-        {/* Footer - Delete - fixed on mobile */}
+        {/* Footer - Delete */}
         <div className="p-4 md:p-5 border-t border-border-subtle bg-bg-secondary">
           {showDeleteConfirm ? (
             <div className="flex items-center gap-3">

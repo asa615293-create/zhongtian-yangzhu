@@ -58,21 +58,16 @@ const AddItemForm: React.FC<AddItemFormProps> = ({ roomId, onClose }) => {
       />
 
       {/* Modal - bottom sheet on mobile, centered on desktop */}
-      <div className="relative w-full md:max-w-md bg-bg-secondary border-t md:border border-border-subtle rounded-t-2xl md:rounded-xl p-5 md:p-6 slide-in-right max-h-[85vh] md:max-h-none overflow-y-auto">
+      <div className="relative w-full md:max-w-md bg-bg-secondary border-t md:border border-border-subtle rounded-t-2xl md:rounded-xl p-5 md:p-6 slide-up max-h-[85vh] md:max-h-none overflow-y-auto">
+        {/* Handle bar - mobile only */}
+        <div className="w-10 h-1 bg-text-muted/30 rounded-full mx-auto mb-4 md:hidden" />
+
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center gap-2">
-            <button
-              onClick={onClose}
-              className="p-2 -ml-2 rounded-lg text-text-muted hover:text-text-primary hover:bg-bg-card transition-colors md:hidden"
-            >
-              <ChevronLeft size={22} />
-            </button>
-            <h3 className="text-lg font-display font-semibold text-text-primary">添加物品</h3>
-          </div>
+          <h3 className="text-lg font-display font-semibold text-text-primary">添加物品</h3>
           <button
             onClick={onClose}
-            className="p-1.5 rounded-lg text-text-muted hover:text-text-primary hover:bg-bg-card transition-colors hidden md:block"
+            className="p-1.5 rounded-lg text-text-muted hover:text-text-primary hover:bg-bg-card transition-colors"
           >
             <X className="w-5 h-5" />
           </button>
@@ -125,14 +120,14 @@ const AddItemForm: React.FC<AddItemFormProps> = ({ roomId, onClose }) => {
             <button
               type="button"
               onClick={onClose}
-              className="btn-secondary flex-1 py-3 md:py-2"
+              className="btn-secondary flex-1 py-3"
             >
               取消
             </button>
             <button
               type="submit"
               disabled={!name.trim()}
-              className="btn-primary flex-1 py-3 md:py-2 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="btn-primary flex-1 py-3 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               添加
             </button>

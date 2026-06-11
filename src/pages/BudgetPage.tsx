@@ -7,6 +7,10 @@ import {
   Download,
   ArrowUpDown,
   ChevronRight,
+  AlertTriangle,
+  Edit3,
+  Check,
+  X,
 } from 'lucide-react';
 import {
   PieChart,
@@ -29,14 +33,14 @@ import Badge from '@/components/common/Badge';
 const CHART_COLORS = [
   '#C4A265', // accent - 香槟金
   '#5C4A3A', // brown - 深咖
-  '#C4BDB4', // 浅灰米（提亮）
+  '#B5B0A8', // 浅灰米
   '#8B7355', // 暖棕
   '#A08060', // 琥珀
-  '#7A6A5A', // 灰棕
-  '#D4B275', // accent-hover
-  '#918981', // 暖灰（提亮）
-  '#B0A89E', // 暖浅灰
   '#6B5B4A', // 暗褐
+  '#D4B275', // accent-hover
+  '#7A6A5A', // 灰棕
+  '#9C8C7C', // 暖灰
+  '#4A3A2A', // 深棕
 ];
 
 // ─── Helpers ────────────────────────────────────────────────────────────────────
@@ -109,57 +113,86 @@ type SortDir = 'asc' | 'desc';
 const BudgetPage: React.FC = () => {
   const rooms = useAppStore((s) => s.rooms);
   const furnishingItems = useAppStore((s) => s.furnishingItems);
+  const budgetTarget = useAppStore((s) => s.budgetTarget);
+  const updateBudgetTarget = useAppStore((s) => s.updateBudgetTarget);
 
   const [sortField, setSortField] = useState<SortField>('budgetMax');
   const [sortDir, setSortDir] = useState<SortDir>('desc');
+  const [editingBudget, setEditingBudget] = useState(false);
+  const [budgetInput, setBudgetInput] = useState('');
 
   // ─── Summary Calculations ───────────────────────────────────────────────────
   const summary = useMemo(() => {
-    const totalBudget = furnishingItems.reduce(
-      (sum, item) => sum + (item.budgetMax || 0),
-      0
+    // 预算分配区间：所有物品的预算下限之和 ~ 预算上限之和
+    const allocatedMin = furnishingItems.reduce(
+      (sum, item) => sum + (item.budgetMin || 0), 0
     );
+    const allocatedMax = furnishingItems.reduce(
+      (sum, item) => sum + (item.budgetMax || 0), 0
+    );
+
+    // 已支出：已购/已安装物品的实际价格（优先）或预算上限
     const totalActual = furnishingItems.reduce(
       (sum, item) => {
         if (item.status === 'purchased' || item.status === 'installed') {
           return sum + (item.actualPrice ?? item.budgetMax ?? 0);
         }
         return sum;
-      },
-      0
+      }, 0
     );
-    const remaining = totalBudget - totalActual;
+
+    // 剩余预算 = 总预算 - 已支出
+    const remaining = budgetTarget - totalActual;
+
+    // 预算分配率 = 预算上限之和 / 总预算
+    const allocationRate = budgetTarget > 0 ? allocatedMax / budgetTarget : 0;
+
+    // 已支出率 = 已支出 / 总预算
+    const spentRate = budgetTarget > 0 ? totalActual / budgetTarget : 0;
+
     return {
-      totalBudget,
+      allocatedMin,
+      allocatedMax,
       totalActual,
       remaining,
+      allocationRate,
+      spentRate,
       itemCount: furnishingItems.length,
+      isOverBudget: allocatedMax > budgetTarget,
     };
-  }, [furnishingItems]);
+  }, [furnishingItems, budgetTarget]);
 
   // ─── Category Data for Pie Chart ────────────────────────────────────────────
   const categoryData = useMemo(() => {
-    const map = new Map<string, number>();
+    const map = new Map<string, { budget: number; actual: number }>();
     furnishingItems.forEach((item) => {
-      const budget = item.budgetMax || 0;
-      map.set(item.category, (map.get(item.category) || 0) + budget);
+      const existing = map.get(item.category) || { budget: 0, actual: 0 };
+      existing.budget += item.budgetMax || 0;
+      if (item.status === 'purchased' || item.status === 'installed') {
+        existing.actual += item.actualPrice ?? item.budgetMax ?? 0;
+      }
+      map.set(item.category, existing);
     });
     return Array.from(map.entries())
-      .map(([name, value]) => ({ name, value }))
+      .map(([name, data]) => ({ name, value: data.budget, actual: data.actual }))
       .sort((a, b) => b.value - a.value);
   }, [furnishingItems]);
 
   // ─── Room Data for Bar Chart ────────────────────────────────────────────────
   const roomData = useMemo(() => {
-    const map = new Map<string, number>();
+    const map = new Map<string, { budget: number; actual: number }>();
     furnishingItems.forEach((item) => {
-      const budget = item.budgetMax || 0;
       const roomName = rooms.find((r) => r.id === item.roomId)?.name || item.roomId;
-      map.set(roomName, (map.get(roomName) || 0) + budget);
+      const existing = map.get(roomName) || { budget: 0, actual: 0 };
+      existing.budget += item.budgetMax || 0;
+      if (item.status === 'purchased' || item.status === 'installed') {
+        existing.actual += item.actualPrice ?? item.budgetMax ?? 0;
+      }
+      map.set(roomName, existing);
     });
     return Array.from(map.entries())
-      .map(([name, value]) => ({ name, value }))
-      .sort((a, b) => b.value - a.value);
+      .map(([name, data]) => ({ name, budget: data.budget, actual: data.actual }))
+      .sort((a, b) => b.budget - a.budget);
   }, [furnishingItems, rooms]);
 
   // ─── Sorted Table Data ──────────────────────────────────────────────────────
@@ -209,6 +242,23 @@ const BudgetPage: React.FC = () => {
       setSortField(field);
       setSortDir('desc');
     }
+  };
+
+  const handleStartEditBudget = () => {
+    setBudgetInput(String(budgetTarget));
+    setEditingBudget(true);
+  };
+
+  const handleSaveBudget = () => {
+    const val = Number(budgetInput);
+    if (val > 0) {
+      updateBudgetTarget(val);
+    }
+    setEditingBudget(false);
+  };
+
+  const handleCancelEditBudget = () => {
+    setEditingBudget(false);
   };
 
   // ─── CSV Export ─────────────────────────────────────────────────────────────
@@ -290,17 +340,85 @@ const BudgetPage: React.FC = () => {
 
       {/* Summary Cards */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
+        {/* 软装总预算 - 可编辑 */}
         <Card className="relative overflow-hidden">
           <div className="absolute top-0 left-0 w-full h-0.5 bg-gradient-to-r from-accent to-accent/20" />
           <div className="flex items-center gap-2 mb-2">
             <Wallet className="w-4 h-4 text-accent" />
-            <span className="text-xs text-text-muted uppercase tracking-wider">总预算</span>
+            <span className="text-xs text-text-muted uppercase tracking-wider">软装总预算</span>
+            {!editingBudget && (
+              <button
+                onClick={handleStartEditBudget}
+                className="ml-auto p-1 rounded text-text-muted hover:text-accent hover:bg-accent-muted transition-colors"
+              >
+                <Edit3 className="w-3 h-3" />
+              </button>
+            )}
           </div>
-          <p className="text-xl font-display font-semibold text-text-primary">
-            {formatCurrency(summary.totalBudget)}
-          </p>
+          {editingBudget ? (
+            <div className="flex items-center gap-1">
+              <span className="text-sm text-text-muted">¥</span>
+              <input
+                type="number"
+                value={budgetInput}
+                onChange={(e) => setBudgetInput(e.target.value)}
+                className="form-input flex-1 text-lg font-display font-semibold py-1 px-2"
+                autoFocus
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') handleSaveBudget();
+                  if (e.key === 'Escape') handleCancelEditBudget();
+                }}
+              />
+              <button onClick={handleSaveBudget} className="p-1 text-success hover:bg-success/10 rounded transition-colors">
+                <Check className="w-4 h-4" />
+              </button>
+              <button onClick={handleCancelEditBudget} className="p-1 text-text-muted hover:bg-bg-card rounded transition-colors">
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+          ) : (
+            <p className="text-xl font-display font-semibold text-text-primary">
+              {formatCurrency(budgetTarget)}
+            </p>
+          )}
         </Card>
 
+        {/* 预算分配 */}
+        <Card className="relative overflow-hidden">
+          <div className="absolute top-0 left-0 w-full h-0.5 bg-gradient-to-r from-accent to-accent/20" />
+          <div className="flex items-center gap-2 mb-2">
+            <Package className="w-4 h-4 text-accent" />
+            <span className="text-xs text-text-muted uppercase tracking-wider">预算分配</span>
+          </div>
+          <p className="text-lg font-display font-semibold text-text-primary">
+            {formatCurrency(summary.allocatedMin)} ~ {formatCurrency(summary.allocatedMax)}
+          </p>
+          {/* 分配进度条 */}
+          <div className="mt-2">
+            <div className="flex items-center justify-between mb-1">
+              <span className="text-xs text-text-muted">分配率</span>
+              <span className={`text-xs font-medium ${summary.isOverBudget ? 'text-error' : 'text-accent'}`}>
+                {(summary.allocationRate * 100).toFixed(0)}%
+              </span>
+            </div>
+            <div className="h-1.5 bg-bg-card rounded-full overflow-hidden">
+              <div
+                className={`h-full rounded-full transition-all duration-500 ${
+                  summary.isOverBudget ? 'bg-error' : 'bg-accent'
+                }`}
+                style={{ width: `${Math.min(summary.allocationRate * 100, 100)}%` }}
+              />
+            </div>
+            {summary.isOverBudget && (
+              <div className="flex items-center gap-1 mt-1.5">
+                <AlertTriangle className="w-3 h-3 text-error" />
+                <span className="text-xs text-error">分配超出总预算</span>
+              </div>
+            )}
+          </div>
+        </Card>
+
+        {/* 已支出 */}
         <Card className="relative overflow-hidden">
           <div className="absolute top-0 left-0 w-full h-0.5 bg-gradient-to-r from-success to-success/20" />
           <div className="flex items-center gap-2 mb-2">
@@ -310,27 +428,41 @@ const BudgetPage: React.FC = () => {
           <p className="text-xl font-display font-semibold text-success">
             {formatCurrency(summary.totalActual)}
           </p>
+          {/* 支出进度条 */}
+          <div className="mt-2">
+            <div className="flex items-center justify-between mb-1">
+              <span className="text-xs text-text-muted">支出率</span>
+              <span className={`text-xs font-medium ${summary.spentRate > 1 ? 'text-error' : 'text-success'}`}>
+                {(summary.spentRate * 100).toFixed(0)}%
+              </span>
+            </div>
+            <div className="h-1.5 bg-bg-card rounded-full overflow-hidden">
+              <div
+                className={`h-full rounded-full transition-all duration-500 ${
+                  summary.spentRate > 1 ? 'bg-error' : 'bg-success'
+                }`}
+                style={{ width: `${Math.min(summary.spentRate * 100, 100)}%` }}
+              />
+            </div>
+          </div>
         </Card>
 
+        {/* 剩余预算 */}
         <Card className="relative overflow-hidden">
-          <div className="absolute top-0 left-0 w-full h-0.5 bg-gradient-to-r from-warning to-warning/20" />
+          <div className={`absolute top-0 left-0 w-full h-0.5 bg-gradient-to-r ${
+            summary.remaining >= 0 ? 'from-warning to-warning/20' : 'from-error to-error/20'
+          }`} />
           <div className="flex items-center gap-2 mb-2">
-            <TrendingDown className="w-4 h-4 text-warning" />
-            <span className="text-xs text-text-muted uppercase tracking-wider">剩余</span>
+            <TrendingDown className={`w-4 h-4 ${summary.remaining >= 0 ? 'text-warning' : 'text-error'}`} />
+            <span className="text-xs text-text-muted uppercase tracking-wider">剩余预算</span>
           </div>
-          <p className="text-xl font-display font-semibold text-warning">
-            {formatCurrency(summary.remaining)}
+          <p className={`text-xl font-display font-semibold ${
+            summary.remaining >= 0 ? 'text-warning' : 'text-error'
+          }`}>
+            {summary.remaining >= 0 ? formatCurrency(summary.remaining) : `-${formatCurrency(Math.abs(summary.remaining))}`}
           </p>
-        </Card>
-
-        <Card className="relative overflow-hidden">
-          <div className="absolute top-0 left-0 w-full h-0.5 bg-gradient-to-r from-brown to-brown/20" />
-          <div className="flex items-center gap-2 mb-2">
-            <Package className="w-4 h-4 text-brown" />
-            <span className="text-xs text-text-muted uppercase tracking-wider">物品数</span>
-          </div>
-          <p className="text-xl font-display font-semibold text-text-primary">
-            {summary.itemCount}
+          <p className="text-xs text-text-muted mt-2">
+            {summary.itemCount} 项物品 · 总预算 - 已支出
           </p>
         </Card>
       </div>
@@ -372,9 +504,9 @@ const BudgetPage: React.FC = () => {
               {/* Center text */}
               <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
                 <div className="text-center">
-                  <p className="text-xs text-text-muted">总预算</p>
+                  <p className="text-xs text-text-muted">预算分配</p>
                   <p className="text-lg font-display font-semibold text-accent">
-                    {formatCurrency(summary.totalBudget)}
+                    {formatCurrency(summary.allocatedMax)}
                   </p>
                 </div>
               </div>
@@ -400,12 +532,12 @@ const BudgetPage: React.FC = () => {
           )}
         </Card>
 
-        {/* Room Bar Chart */}
+        {/* Room Bar Chart - 预算 vs 实际 */}
         <Card>
           <div className="flex items-center gap-2 mb-4">
             <div className="w-1 h-4 rounded-full bg-brown" />
             <span className="text-sm font-medium text-text-secondary uppercase tracking-wider">
-              空间预算分布
+              空间预算 vs 实际
             </span>
           </div>
           {roomData.length > 0 ? (
@@ -415,11 +547,11 @@ const BudgetPage: React.FC = () => {
                 layout="vertical"
                 margin={{ top: 0, right: 20, bottom: 0, left: 0 }}
               >
-                <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.06)" horizontal={false} />
+                <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" horizontal={false} />
                 <XAxis
                   type="number"
                   tick={{ fill: '#918981', fontSize: 11 }}
-                  axisLine={{ stroke: 'rgba(255,255,255,0.08)' }}
+                  axisLine={{ stroke: 'rgba(255,255,255,0.06)' }}
                   tickFormatter={(v: number) => v >= 10000 ? `${(v / 10000).toFixed(0)}万` : `${v}`}
                 />
                 <YAxis
@@ -427,22 +559,47 @@ const BudgetPage: React.FC = () => {
                   dataKey="name"
                   width={60}
                   tick={{ fill: '#C4BDB4', fontSize: 12 }}
-                  axisLine={{ stroke: 'rgba(255,255,255,0.08)' }}
+                  axisLine={{ stroke: 'rgba(255,255,255,0.06)' }}
                 />
-                <Tooltip content={<CustomBarTooltip />} />
-                <Bar dataKey="value" radius={[0, 6, 6, 0]} barSize={20}>
-                  {roomData.map((_, index) => (
-                    <Cell
-                      key={`cell-${index}`}
-                      fill={CHART_COLORS[index % CHART_COLORS.length]}
-                    />
-                  ))}
-                </Bar>
+                <Tooltip
+                  content={({ active, payload }) => {
+                    if (!active || !payload?.length) return null;
+                    const data = payload[0].payload;
+                    return (
+                      <div className="bg-bg-secondary border border-border-subtle rounded-lg px-3 py-2 shadow-xl">
+                        <p className="text-sm text-text-primary font-medium">{data.name}</p>
+                        <p className="text-sm text-accent mt-1">
+                          预算: {formatCurrencyFull(data.budget)}
+                        </p>
+                        {data.actual > 0 && (
+                          <p className="text-sm text-success">
+                            实际: {formatCurrencyFull(data.actual)}
+                          </p>
+                        )}
+                      </div>
+                    );
+                  }}
+                />
+                <Bar dataKey="budget" radius={[0, 6, 6, 0]} barSize={12} fill="#C4A265" name="预算" />
+                <Bar dataKey="actual" radius={[0, 6, 6, 0]} barSize={12} fill="#34C759" name="实际" />
               </BarChart>
             </ResponsiveContainer>
           ) : (
             <div className="h-[280px] flex items-center justify-center text-text-muted text-sm">
               暂无数据
+            </div>
+          )}
+          {/* Legend */}
+          {roomData.length > 0 && (
+            <div className="flex items-center gap-4 mt-2">
+              <div className="flex items-center gap-1.5">
+                <div className="w-2.5 h-2.5 rounded-full bg-accent" />
+                <span className="text-xs text-text-muted">预算</span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <div className="w-2.5 h-2.5 rounded-full bg-success" />
+                <span className="text-xs text-text-muted">实际</span>
+              </div>
             </div>
           )}
         </Card>
@@ -462,7 +619,7 @@ const BudgetPage: React.FC = () => {
 
         {sortedItems.length > 0 ? (
           <div className="overflow-x-auto -mx-5">
-            <table className="w-full min-w-[640px]">
+            <table className="w-full min-w-[540px]">
               <thead>
                 <tr className="border-b border-border-subtle">
                   <SortHeader field="name" label="物品名称" />
