@@ -11,7 +11,7 @@ const Dashboard: React.FC = () => {
   const deliverySpecs = useAppStore((s) => s.deliverySpecs);
   const furnishingItems = useAppStore((s) => s.furnishingItems);
   const designSchemes = useAppStore((s) => s.designSchemes);
-  const budgetRecords = useAppStore((s) => s.budgetRecords);
+  const budgetTarget = useAppStore((s) => s.budgetTarget);
 
   // 计算已填写交付标准的房间数
   const roomsWithSpecs = rooms.filter((room) => {
@@ -19,8 +19,13 @@ const Dashboard: React.FC = () => {
     return specs && specs.length > 0 && specs.some((spec) => spec.value || spec.brand || spec.model);
   }).length;
 
-  // 计算预算总额
-  const totalBudget = budgetRecords.reduce((sum, record) => sum + record.budgetAmount, 0);
+  // 计算已支出
+  const totalActual = furnishingItems.reduce((sum, item) => {
+    if (item.status === 'purchased' || item.status === 'installed') {
+      return sum + (item.actualPrice ?? item.budgetMax ?? 0);
+    }
+    return sum;
+  }, 0);
 
   const formatBudget = (value: number) => {
     if (value >= 10000) {
@@ -28,6 +33,13 @@ const Dashboard: React.FC = () => {
     }
     return `¥${value.toLocaleString('zh-CN')}`;
   };
+
+  // 软装进度
+  const installedCount = furnishingItems.filter((i) => i.status === 'installed').length;
+  const purchasedCount = furnishingItems.filter((i) => i.status === 'purchased').length;
+  const furnishingProgress = furnishingItems.length > 0
+    ? Math.round(((installedCount + purchasedCount) / furnishingItems.length) * 100)
+    : 0;
 
   const progressCards = [
     {
@@ -40,8 +52,8 @@ const Dashboard: React.FC = () => {
     {
       icon: ShoppingBag,
       label: '软装清单',
-      value: `${furnishingItems.length}`,
-      sublabel: '件物品',
+      value: `${furnishingProgress}%`,
+      sublabel: `${installedCount + purchasedCount}/${furnishingItems.length} 已落实`,
       link: '/furnishing',
     },
     {
@@ -54,8 +66,8 @@ const Dashboard: React.FC = () => {
     {
       icon: Wallet,
       label: '预算管理',
-      value: totalBudget > 0 ? formatBudget(totalBudget) : '—',
-      sublabel: '总预算',
+      value: totalActual > 0 ? `${formatBudget(totalActual)}` : formatBudget(budgetTarget),
+      sublabel: totalActual > 0 ? '已支出' : '总预算',
       link: '/budget',
     },
   ];
@@ -151,15 +163,6 @@ const Dashboard: React.FC = () => {
             );
           })}
         </div>
-      </section>
-
-      {/* Inspirational Quote Section */}
-      <section className="text-center py-8">
-        <div className="gold-divider max-w-xs mx-auto mb-8" />
-        <blockquote className="font-display text-lg md:text-xl text-text-secondary italic max-w-md mx-auto leading-relaxed">
-          "家，是灵魂的栖息地，是生活美学的最终表达。"
-        </blockquote>
-        <p className="text-xs text-text-muted mt-4 tracking-wider">— 为理想居所，精心筹划</p>
       </section>
     </div>
   );
