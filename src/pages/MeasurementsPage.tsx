@@ -3,8 +3,10 @@ import { Ruler, Plus, Trash2, Upload, X, Save } from 'lucide-react';
 import { useAppStore } from '@/store/useAppStore';
 import type { Measurement } from '@/types';
 import Card from '@/components/common/Card';
+import { useComposingInput } from '@/hooks/useComposingInput';
 
 const MeasurementsPage: React.FC = () => {
+  const { onCompositionStart, onCompositionEnd, isComposing } = useComposingInput();
   const rooms = useAppStore((s) => s.rooms);
   const measurements = useAppStore((s) => s.measurements);
   const addMeasurement = useAppStore((s) => s.addMeasurement);
@@ -157,7 +159,9 @@ const MeasurementsPage: React.FC = () => {
                     <input
                       type="text"
                       value={m.wallName}
-                      onChange={(e) => handleFieldUpdate(m.id, 'wallName', e.target.value)}
+                      onChange={(e) => { if (isComposing()) return; handleFieldUpdate(m.id, 'wallName', e.target.value); }}
+                      onCompositionStart={onCompositionStart}
+                      onCompositionEnd={(e) => { onCompositionEnd(); }}
                       placeholder="如：南墙"
                       className="form-input w-full text-sm"
                     />
@@ -202,7 +206,9 @@ const MeasurementsPage: React.FC = () => {
                   <input
                     type="text"
                     value={m.notes}
-                    onChange={(e) => handleFieldUpdate(m.id, 'notes', e.target.value)}
+                    onChange={(e) => { if (isComposing()) return; handleFieldUpdate(m.id, 'notes', e.target.value); }}
+                    onCompositionStart={onCompositionStart}
+                    onCompositionEnd={(e) => { onCompositionEnd(); }}
                     placeholder="备注"
                     className="form-input w-full text-sm"
                   />
@@ -214,7 +220,9 @@ const MeasurementsPage: React.FC = () => {
                 <input
                   type="text"
                   value={m.wallName}
-                  onChange={(e) => handleFieldUpdate(m.id, 'wallName', e.target.value)}
+                  onChange={(e) => { if (isComposing()) return; handleFieldUpdate(m.id, 'wallName', e.target.value); }}
+                  onCompositionStart={onCompositionStart}
+                  onCompositionEnd={(e) => { onCompositionEnd(); }}
                   placeholder="如：南墙"
                   className="form-input w-full text-sm"
                 />
@@ -245,7 +253,9 @@ const MeasurementsPage: React.FC = () => {
                 <input
                   type="text"
                   value={m.notes}
-                  onChange={(e) => handleFieldUpdate(m.id, 'notes', e.target.value)}
+                  onChange={(e) => { if (isComposing()) return; handleFieldUpdate(m.id, 'notes', e.target.value); }}
+                  onCompositionStart={onCompositionStart}
+                  onCompositionEnd={(e) => { onCompositionEnd(); }}
                   placeholder="备注"
                   className="form-input w-full text-sm"
                 />

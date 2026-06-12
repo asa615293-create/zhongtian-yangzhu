@@ -1,5 +1,6 @@
 import React, { useRef } from 'react';
 import { Upload, X } from 'lucide-react';
+import { useComposingInput } from '@/hooks/useComposingInput';
 
 interface Photo {
   id: string;
@@ -67,6 +68,7 @@ const PhotoUploader: React.FC<PhotoUploaderProps> = ({
   onUpdateNotes,
   category,
 }) => {
+  const { onCompositionStart, onCompositionEnd, isComposing } = useComposingInput();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleClick = () => {
@@ -129,7 +131,9 @@ const PhotoUploader: React.FC<PhotoUploaderProps> = ({
                 <input
                   type="text"
                   value={photo.notes}
-                  onChange={(e) => onUpdateNotes(photo.id, e.target.value)}
+                  onChange={(e) => { if (isComposing()) return; onUpdateNotes(photo.id, e.target.value); }}
+                  onCompositionStart={onCompositionStart}
+                  onCompositionEnd={(e) => { onCompositionEnd(); }}
                   placeholder="添加备注..."
                   className="w-full bg-transparent text-xs text-text-secondary placeholder:text-text-muted border-b border-border-subtle focus:outline-none focus:border-accent"
                 />

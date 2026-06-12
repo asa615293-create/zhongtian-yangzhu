@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useRef, useCallback } from 'react';
 
 interface SelectOption {
   value: string;
@@ -30,6 +30,22 @@ const FormField: React.FC<FormFieldProps> = ({
   unit,
   className,
 }) => {
+  const isComposingRef = useRef(false);
+
+  const handleCompositionStart = useCallback(() => {
+    isComposingRef.current = true;
+  }, []);
+
+  const handleCompositionEnd = useCallback((e: React.CompositionEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    isComposingRef.current = false;
+    onChange((e.target as HTMLInputElement | HTMLTextAreaElement).value);
+  }, [onChange]);
+
+  const handleChange = useCallback((e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+    if (isComposingRef.current) return;
+    onChange((e.target as HTMLInputElement | HTMLTextAreaElement).value);
+  }, [onChange]);
+
   return (
     <div className={`form-group ${className || ''}`}>
       <label className="form-label">{label}</label>
@@ -37,7 +53,7 @@ const FormField: React.FC<FormFieldProps> = ({
         <div className="relative">
           <select
             value={value}
-            onChange={(e) => onChange(e.target.value)}
+            onChange={handleChange}
             className="form-input w-full appearance-none"
           >
             {placeholder && (
@@ -61,7 +77,9 @@ const FormField: React.FC<FormFieldProps> = ({
       ) : type === 'textarea' ? (
         <textarea
           value={value}
-          onChange={(e) => onChange(e.target.value)}
+          onChange={handleChange}
+          onCompositionStart={handleCompositionStart}
+          onCompositionEnd={handleCompositionEnd}
           placeholder={placeholder}
           className="form-input w-full resize-none"
           rows={3}
@@ -71,7 +89,9 @@ const FormField: React.FC<FormFieldProps> = ({
           <input
             type={type}
             value={value}
-            onChange={(e) => onChange(e.target.value)}
+            onChange={handleChange}
+            onCompositionStart={handleCompositionStart}
+            onCompositionEnd={handleCompositionEnd}
             placeholder={placeholder}
             className="form-input w-full"
           />

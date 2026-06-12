@@ -5,6 +5,7 @@ import { systemsFieldDefinitions } from '@/data/deliveryFields';
 import type { DeliverySpec } from '@/types';
 import Card from '@/components/common/Card';
 import FormField from '@/components/common/FormField';
+import { useComposingInput } from '@/hooks/useComposingInput';
 
 const SYSTEMS_KEY = 'systems';
 
@@ -12,6 +13,7 @@ const SystemsPage: React.FC = () => {
   const deliverySpecs = useAppStore((s) => s.deliverySpecs);
   const updateDeliverySpec = useAppStore((s) => s.updateDeliverySpec);
   const setDeliverySpecs = useAppStore((s) => s.setDeliverySpecs);
+  const { onCompositionStart, onCompositionEnd, isComposing } = useComposingInput();
 
   const [saveIndicator, setSaveIndicator] = useState(false);
   const saveTimerRef = useRef<ReturnType<typeof setTimeout>>();
@@ -180,21 +182,27 @@ const SystemsPage: React.FC = () => {
                         <input
                           type="text"
                           value={spec?.brand || ''}
-                          onChange={(e) => handleSubFieldChange(field.key, field.label, category.name, 'brand', e.target.value)}
+                          onChange={(e) => { if (isComposing()) return; handleSubFieldChange(field.key, field.label, category.name, 'brand', e.target.value); }}
+                          onCompositionStart={onCompositionStart}
+                          onCompositionEnd={(e) => { onCompositionEnd(); handleSubFieldChange(field.key, field.label, category.name, 'brand', (e.target as HTMLInputElement).value); }}
                           placeholder="品牌"
                           className="form-input w-full text-xs py-1 px-2"
                         />
                         <input
                           type="text"
                           value={spec?.model || ''}
-                          onChange={(e) => handleSubFieldChange(field.key, field.label, category.name, 'model', e.target.value)}
+                          onChange={(e) => { if (isComposing()) return; handleSubFieldChange(field.key, field.label, category.name, 'model', e.target.value); }}
+                          onCompositionStart={onCompositionStart}
+                          onCompositionEnd={(e) => { onCompositionEnd(); handleSubFieldChange(field.key, field.label, category.name, 'model', (e.target as HTMLInputElement).value); }}
                           placeholder="型号"
                           className="form-input w-full text-xs py-1 px-2"
                         />
                         <input
                           type="text"
                           value={spec?.colorCode || ''}
-                          onChange={(e) => handleSubFieldChange(field.key, field.label, category.name, 'colorCode', e.target.value)}
+                          onChange={(e) => { if (isComposing()) return; handleSubFieldChange(field.key, field.label, category.name, 'colorCode', e.target.value); }}
+                          onCompositionStart={onCompositionStart}
+                          onCompositionEnd={(e) => { onCompositionEnd(); handleSubFieldChange(field.key, field.label, category.name, 'colorCode', (e.target as HTMLInputElement).value); }}
                           placeholder="色号"
                           className="form-input w-full text-xs py-1 px-2"
                         />
@@ -207,7 +215,9 @@ const SystemsPage: React.FC = () => {
               <div className="mt-4 pt-3 border-t border-border-subtle">
                 <textarea
                   value={categoryNotesSpec?.value || ''}
-                  onChange={(e) => handleCategoryNotesChange(category.name, e.target.value)}
+                  onChange={(e) => { if (isComposing()) return; handleCategoryNotesChange(category.name, e.target.value); }}
+                  onCompositionStart={onCompositionStart}
+                  onCompositionEnd={(e) => { onCompositionEnd(); handleCategoryNotesChange(category.name, (e.target as HTMLTextAreaElement).value); }}
                   placeholder={`${category.name}备注...`}
                   className="form-input w-full text-sm resize-none"
                   rows={2}

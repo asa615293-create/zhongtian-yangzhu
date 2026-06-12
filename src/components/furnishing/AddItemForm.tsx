@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { X, ChevronLeft } from 'lucide-react';
 import { useAppStore } from '@/store/useAppStore';
 import type { FurnishingItem } from '@/types';
+import { useComposingInput } from '@/hooks/useComposingInput';
 
 interface AddItemFormProps {
   roomId: string;
@@ -64,6 +65,7 @@ const categoryPlaceholderMap: Record<string, string> = {
 };
 
 const AddItemForm: React.FC<AddItemFormProps> = ({ roomId, onClose }) => {
+  const { onCompositionStart, onCompositionEnd, isComposing } = useComposingInput();
   const rooms = useAppStore((s) => s.rooms);
   const addFurnishingItem = useAppStore((s) => s.addFurnishingItem);
 
@@ -146,7 +148,9 @@ const AddItemForm: React.FC<AddItemFormProps> = ({ roomId, onClose }) => {
             <input
               type="text"
               value={name}
-              onChange={(e) => setName(e.target.value)}
+              onChange={(e) => { if (isComposing()) return; setName(e.target.value); }}
+              onCompositionStart={onCompositionStart}
+              onCompositionEnd={(e) => { onCompositionEnd(); }}
               placeholder={placeholder}
               className="form-input w-full"
               autoFocus

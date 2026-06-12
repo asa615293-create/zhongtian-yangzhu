@@ -557,10 +557,20 @@ const API_BASE = import.meta.env.VITE_API_URL || '';
 
 // 防抖保存
 let saveTimer: ReturnType<typeof setTimeout> | null = null;
+let isComposing = false; // IME 组合输入中，延迟保存
+
+export function setComposing(value: boolean) {
+  isComposing = value;
+}
 
 async function debouncedSave(data: AppData) {
   if (saveTimer) clearTimeout(saveTimer);
   saveTimer = setTimeout(async () => {
+    // IME 组合输入中，延迟保存避免中间拼音被持久化
+    if (isComposing) {
+      debouncedSave(data);
+      return;
+    }
     try {
       await fetch(`${API_BASE}/api/data`, {
         method: 'PUT',

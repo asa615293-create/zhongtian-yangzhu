@@ -3,6 +3,7 @@ import { X, Trash2, Upload, ChevronLeft } from 'lucide-react';
 import { useAppStore } from '@/store/useAppStore';
 import type { FurnishingItem, ReferenceImage } from '@/types';
 import FormField from '@/components/common/FormField';
+import { useComposingInput } from '@/hooks/useComposingInput';
 
 interface ItemDetailProps {
   item: FurnishingItem;
@@ -60,6 +61,7 @@ const compressImage = (base64Data: string): Promise<string> => {
 };
 
 const ItemDetail: React.FC<ItemDetailProps> = ({ item, onClose }) => {
+  const { onCompositionStart, onCompositionEnd, isComposing } = useComposingInput();
   const rooms = useAppStore((s) => s.rooms);
   const updateFurnishingItem = useAppStore((s) => s.updateFurnishingItem);
   const removeFurnishingItem = useAppStore((s) => s.removeFurnishingItem);
@@ -353,7 +355,9 @@ const ItemDetail: React.FC<ItemDetailProps> = ({ item, onClose }) => {
                       <input
                         type="text"
                         value={img.notes}
-                        onChange={(e) => handleUpdateImageNotes(img.id, e.target.value)}
+                        onChange={(e) => { if (isComposing()) return; handleUpdateImageNotes(img.id, e.target.value); }}
+                        onCompositionStart={onCompositionStart}
+                        onCompositionEnd={(e) => { onCompositionEnd(); }}
                         placeholder="添加备注..."
                         className="w-full bg-transparent text-xs text-text-secondary placeholder:text-text-muted border-b border-border-subtle focus:outline-none focus:border-accent"
                       />
