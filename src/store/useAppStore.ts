@@ -682,7 +682,7 @@ export const useAppStore = create<AppStore>()((set, get) => ({
   furnishingItems: defaultFurnishingItems,
   designSchemes: [],
   budgetRecords: [],
-  budgetTarget: 200000,
+  budgetTarget: 150000,
 
   // 从服务器加载数据
   loadFromServer: async () => {
@@ -700,7 +700,7 @@ export const useAppStore = create<AppStore>()((set, get) => ({
             furnishingItems: data.furnishingItems?.length ? data.furnishingItems : defaultFurnishingItems,
             designSchemes: data.designSchemes || [],
             budgetRecords: data.budgetRecords || [],
-            budgetTarget: data.budgetTarget || 200000,
+            budgetTarget: data.budgetTarget || 150000,
             loaded: true,
           });
           return;
@@ -954,7 +954,7 @@ export const useAppStore = create<AppStore>()((set, get) => ({
         furnishingItems: data.furnishingItems?.length ? data.furnishingItems : defaultFurnishingItems,
         designSchemes: data.designSchemes || [],
         budgetRecords: data.budgetRecords || [],
-        budgetTarget: data.budgetTarget || 200000,
+        budgetTarget: data.budgetTarget || 150000,
       };
       set(next);
       triggerSave({ ...get(), ...next });
