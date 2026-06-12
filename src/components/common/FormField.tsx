@@ -1,4 +1,5 @@
-import React, { useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { setComposing } from '@/store/useAppStore';
 
 interface SelectOption {
   value: string;
@@ -30,20 +31,36 @@ const FormField: React.FC<FormFieldProps> = ({
   unit,
   className,
 }) => {
+  // 本地状态：组合输入期间用本地值显示，不更新父组件
+  const [localValue, setLocalValue] = useState(value);
   const isComposingRef = useRef(false);
+
+  // 非组合期间，同步父组件的值
+  useEffect(() => {
+    if (!isComposingRef.current) {
+      setLocalValue(value);
+    }
+  }, [value]);
 
   const handleCompositionStart = useCallback(() => {
     isComposingRef.current = true;
+    setComposing(true);
   }, []);
 
   const handleCompositionEnd = useCallback((e: React.CompositionEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     isComposingRef.current = false;
-    onChange((e.target as HTMLInputElement | HTMLTextAreaElement).value);
+    setComposing(false);
+    const finalValue = (e.target as HTMLInputElement | HTMLTextAreaElement).value;
+    setLocalValue(finalValue);
+    onChange(finalValue);
   }, [onChange]);
 
   const handleChange = useCallback((e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-    if (isComposingRef.current) return;
-    onChange((e.target as HTMLInputElement | HTMLTextAreaElement).value);
+    const newValue = (e.target as HTMLInputElement | HTMLTextAreaElement).value;
+    setLocalValue(newValue);
+    if (!isComposingRef.current) {
+      onChange(newValue);
+    }
   }, [onChange]);
 
   return (
@@ -52,7 +69,7 @@ const FormField: React.FC<FormFieldProps> = ({
       {type === 'select' ? (
         <div className="relative">
           <select
-            value={value}
+            value={localValue}
             onChange={handleChange}
             className="form-input w-full appearance-none"
           >
@@ -76,7 +93,7 @@ const FormField: React.FC<FormFieldProps> = ({
         </div>
       ) : type === 'textarea' ? (
         <textarea
-          value={value}
+          value={localValue}
           onChange={handleChange}
           onCompositionStart={handleCompositionStart}
           onCompositionEnd={handleCompositionEnd}
@@ -88,7 +105,7 @@ const FormField: React.FC<FormFieldProps> = ({
         <div className="relative">
           <input
             type={type}
-            value={value}
+            value={localValue}
             onChange={handleChange}
             onCompositionStart={handleCompositionStart}
             onCompositionEnd={handleCompositionEnd}

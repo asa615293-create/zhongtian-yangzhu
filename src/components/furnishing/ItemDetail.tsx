@@ -355,9 +355,9 @@ const ItemDetail: React.FC<ItemDetailProps> = ({ item, onClose }) => {
                       <input
                         type="text"
                         value={img.notes}
-                        onChange={(e) => { if (isComposing()) return; handleUpdateImageNotes(img.id, e.target.value); }}
+                        onChange={(e) => handleUpdateImageNotes(img.id, e.target.value)}
                         onCompositionStart={onCompositionStart}
-                        onCompositionEnd={(e) => { onCompositionEnd(); }}
+                        onCompositionEnd={onCompositionEnd}
                         placeholder="添加备注..."
                         className="w-full bg-transparent text-xs text-text-secondary placeholder:text-text-muted border-b border-border-subtle focus:outline-none focus:border-accent"
                       />

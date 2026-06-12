@@ -159,9 +159,9 @@ const MeasurementsPage: React.FC = () => {
                     <input
                       type="text"
                       value={m.wallName}
-                      onChange={(e) => { if (isComposing()) return; handleFieldUpdate(m.id, 'wallName', e.target.value); }}
+                      onChange={(e) => handleFieldUpdate(m.id, 'wallName', e.target.value)}
                       onCompositionStart={onCompositionStart}
-                      onCompositionEnd={(e) => { onCompositionEnd(); }}
+                      onCompositionEnd={onCompositionEnd}
                       placeholder="如：南墙"
                       className="form-input w-full text-sm"
                     />
@@ -206,9 +206,9 @@ const MeasurementsPage: React.FC = () => {
                   <input
                     type="text"
                     value={m.notes}
-                    onChange={(e) => { if (isComposing()) return; handleFieldUpdate(m.id, 'notes', e.target.value); }}
+                    onChange={(e) => handleFieldUpdate(m.id, 'notes', e.target.value)}
                     onCompositionStart={onCompositionStart}
-                    onCompositionEnd={(e) => { onCompositionEnd(); }}
+                    onCompositionEnd={onCompositionEnd}
                     placeholder="备注"
                     className="form-input w-full text-sm"
                   />
@@ -220,9 +220,9 @@ const MeasurementsPage: React.FC = () => {
                 <input
                   type="text"
                   value={m.wallName}
-                  onChange={(e) => { if (isComposing()) return; handleFieldUpdate(m.id, 'wallName', e.target.value); }}
+                  onChange={(e) => handleFieldUpdate(m.id, 'wallName', e.target.value)}
                   onCompositionStart={onCompositionStart}
-                  onCompositionEnd={(e) => { onCompositionEnd(); }}
+                  onCompositionEnd={onCompositionEnd}
                   placeholder="如：南墙"
                   className="form-input w-full text-sm"
                 />
@@ -253,9 +253,9 @@ const MeasurementsPage: React.FC = () => {
                 <input
                   type="text"
                   value={m.notes}
-                  onChange={(e) => { if (isComposing()) return; handleFieldUpdate(m.id, 'notes', e.target.value); }}
+                  onChange={(e) => handleFieldUpdate(m.id, 'notes', e.target.value)}
                   onCompositionStart={onCompositionStart}
-                  onCompositionEnd={(e) => { onCompositionEnd(); }}
+                  onCompositionEnd={onCompositionEnd}
                   placeholder="备注"
                   className="form-input w-full text-sm"
                 />

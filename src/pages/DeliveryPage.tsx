@@ -200,27 +200,27 @@ const DeliveryPage: React.FC = () => {
                         <input
                           type="text"
                           value={spec?.brand || ''}
-                          onChange={(e) => { if (isComposing()) return; handleSubFieldChange(field.key, field.label, category.name, 'brand', e.target.value); }}
+                          onChange={(e) => handleSubFieldChange(field.key, field.label, category.name, 'brand', e.target.value)}
                           onCompositionStart={onCompositionStart}
-                          onCompositionEnd={(e) => { onCompositionEnd(); handleSubFieldChange(field.key, field.label, category.name, 'brand', (e.target as HTMLInputElement).value); }}
+                          onCompositionEnd={onCompositionEnd}
                           placeholder="品牌"
                           className="form-input w-full text-xs py-1 px-2"
                         />
                         <input
                           type="text"
                           value={spec?.model || ''}
-                          onChange={(e) => { if (isComposing()) return; handleSubFieldChange(field.key, field.label, category.name, 'model', e.target.value); }}
+                          onChange={(e) => handleSubFieldChange(field.key, field.label, category.name, 'model', e.target.value)}
                           onCompositionStart={onCompositionStart}
-                          onCompositionEnd={(e) => { onCompositionEnd(); handleSubFieldChange(field.key, field.label, category.name, 'model', (e.target as HTMLInputElement).value); }}
+                          onCompositionEnd={onCompositionEnd}
                           placeholder="型号"
                           className="form-input w-full text-xs py-1 px-2"
                         />
                         <input
                           type="text"
                           value={spec?.colorCode || ''}
-                          onChange={(e) => { if (isComposing()) return; handleSubFieldChange(field.key, field.label, category.name, 'colorCode', e.target.value); }}
+                          onChange={(e) => handleSubFieldChange(field.key, field.label, category.name, 'colorCode', e.target.value)}
                           onCompositionStart={onCompositionStart}
-                          onCompositionEnd={(e) => { onCompositionEnd(); handleSubFieldChange(field.key, field.label, category.name, 'colorCode', (e.target as HTMLInputElement).value); }}
+                          onCompositionEnd={onCompositionEnd}
                           placeholder="色号"
                           className="form-input w-full text-xs py-1 px-2"
                         />
@@ -233,9 +233,9 @@ const DeliveryPage: React.FC = () => {
               <div className="mt-4 pt-3 border-t border-border-subtle">
                 <textarea
                   value={categoryNotesSpec?.value || ''}
-                  onChange={(e) => { if (isComposing()) return; handleCategoryNotesChange(category.name, e.target.value); }}
+                  onChange={(e) => handleCategoryNotesChange(category.name, e.target.value)}
                   onCompositionStart={onCompositionStart}
-                  onCompositionEnd={(e) => { onCompositionEnd(); handleCategoryNotesChange(category.name, (e.target as HTMLTextAreaElement).value); }}
+                  onCompositionEnd={onCompositionEnd}
                   placeholder={`${category.name}备注...`}
                   className="form-input w-full text-sm resize-none"
                   rows={2}

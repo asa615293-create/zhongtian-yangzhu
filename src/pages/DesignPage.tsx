@@ -175,9 +175,9 @@ const StyleTab: React.FC = () => {
           <input
             type="text"
             value={styleScheme?.keywords || ''}
-            onChange={(e) => { if (isComposing()) return; handleFieldUpdate('keywords', e.target.value); }}
+            onChange={(e) => handleFieldUpdate('keywords', e.target.value)}
             onCompositionStart={onCompositionStart}
-            onCompositionEnd={(e) => { onCompositionEnd(); handleFieldUpdate('keywords', (e.target as HTMLInputElement).value); }}
+            onCompositionEnd={onCompositionEnd}
             placeholder="例如：现代轻奢 · 珠宝艺术 · 隐奢"
             className="w-full bg-transparent text-text-primary text-lg font-display tracking-wide border-b border-border-subtle focus:border-accent/50 focus:ring-0 outline-none py-2 placeholder:text-text-muted/50"
           />
@@ -195,9 +195,9 @@ const StyleTab: React.FC = () => {
           </div>
           <textarea
             value={styleScheme?.description || ''}
-            onChange={(e) => { if (isComposing()) return; handleFieldUpdate('description', e.target.value); }}
+            onChange={(e) => handleFieldUpdate('description', e.target.value)}
             onCompositionStart={onCompositionStart}
-            onCompositionEnd={(e) => { onCompositionEnd(); handleFieldUpdate('description', (e.target as HTMLTextAreaElement).value); }}
+            onCompositionEnd={onCompositionEnd}
             placeholder="详细描述设计方向、灵感来源、材质偏好、生活方式诉求……"
             rows={5}
             className="w-full bg-transparent text-text-primary border-b border-border-subtle focus:border-accent/50 focus:ring-0 outline-none py-2 placeholder:text-text-muted/50 resize-none"
@@ -323,9 +323,9 @@ const ColorTab: React.FC = () => {
                   <input
                     type="text"
                     value={color.name}
-                    onChange={(e) => { if (isComposing()) return; updateColor(index, 'name', e.target.value); }}
+                    onChange={(e) => updateColor(index, 'name', e.target.value)}
                     onCompositionStart={onCompositionStart}
-                    onCompositionEnd={(e) => { onCompositionEnd(); updateColor(index, 'name', (e.target as HTMLInputElement).value); }}
+                    onCompositionEnd={onCompositionEnd}
                     className="form-input w-full"
                     placeholder="颜色名称"
                   />
@@ -334,9 +334,9 @@ const ColorTab: React.FC = () => {
                   <label className="form-label">用途描述</label>
                   <textarea
                     value={color.usage}
-                    onChange={(e) => { if (isComposing()) return; updateColor(index, 'usage', e.target.value); }}
+                    onChange={(e) => updateColor(index, 'usage', e.target.value)}
                     onCompositionStart={onCompositionStart}
-                    onCompositionEnd={(e) => { onCompositionEnd(); updateColor(index, 'usage', (e.target as HTMLTextAreaElement).value); }}
+                    onCompositionEnd={onCompositionEnd}
                     className="form-input w-full resize-none"
                     rows={2}
                     placeholder="描述该色彩在空间中的应用"
@@ -523,9 +523,9 @@ const SpaceTab: React.FC = () => {
           </div>
           <textarea
             value={currentScheme?.description || ''}
-            onChange={(e) => { if (isComposing()) return; handleFieldUpdate('description', e.target.value); }}
+            onChange={(e) => handleFieldUpdate('description', e.target.value)}
             onCompositionStart={onCompositionStart}
-            onCompositionEnd={(e) => { onCompositionEnd(); handleFieldUpdate('description', (e.target as HTMLTextAreaElement).value); }}
+            onCompositionEnd={onCompositionEnd}
             placeholder="描述该空间的设计理念、布局方案、材质搭配……"
             rows={4}
             className="w-full bg-transparent text-text-primary border-b border-border-subtle focus:border-accent/50 focus:ring-0 outline-none py-2 placeholder:text-text-muted/50 resize-none"
@@ -690,9 +690,9 @@ const ReferenceTab: React.FC = () => {
                 <input
                   type="text"
                   value={scheme.notes}
-                  onChange={(e) => { if (isComposing()) return; updateNote(scheme.id, e.target.value); }}
+                  onChange={(e) => updateNote(scheme.id, e.target.value)}
                   onCompositionStart={onCompositionStart}
-                  onCompositionEnd={(e) => { onCompositionEnd(); updateNote(scheme.id, (e.target as HTMLInputElement).value); }}
+                  onCompositionEnd={onCompositionEnd}
                   placeholder="添加备注…"
                   className="w-full bg-transparent text-xs text-text-secondary placeholder:text-text-muted border-b border-border-subtle focus:outline-none focus:border-accent py-1"
                 />

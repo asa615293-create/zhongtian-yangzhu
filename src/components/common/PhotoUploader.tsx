@@ -131,9 +131,9 @@ const PhotoUploader: React.FC<PhotoUploaderProps> = ({
                 <input
                   type="text"
                   value={photo.notes}
-                  onChange={(e) => { if (isComposing()) return; onUpdateNotes(photo.id, e.target.value); }}
+                  onChange={(e) => onUpdateNotes(photo.id, e.target.value)}
                   onCompositionStart={onCompositionStart}
-                  onCompositionEnd={(e) => { onCompositionEnd(); }}
+                  onCompositionEnd={onCompositionEnd}
                   placeholder="添加备注..."
                   className="w-full bg-transparent text-xs text-text-secondary placeholder:text-text-muted border-b border-border-subtle focus:outline-none focus:border-accent"
                 />

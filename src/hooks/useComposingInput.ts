@@ -3,12 +3,8 @@ import { setComposing } from '@/store/useAppStore';
 
 /**
  * 处理中文输入法（IME）组合事件的 hook。
- * 在组合输入期间（如拼音输入），阻止 onChange 更新状态，
- * 等 compositionend 后才提交最终值，避免中间拼音被保存。
- *
- * 双重防护：
- * 1. 组件层：onChange 在 composing 期间不触发回调
- * 2. Store 层：debouncedSave 在 composing 期间延迟保存
+ * 只设置 store 层的 composing 标记，延迟保存到服务器。
+ * 不阻断 onChange，避免受控组件无法更新显示值。
  */
 export function useComposingInput() {
   const isComposingRef = useRef(false);

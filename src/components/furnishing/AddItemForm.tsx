@@ -148,9 +148,9 @@ const AddItemForm: React.FC<AddItemFormProps> = ({ roomId, onClose }) => {
             <input
               type="text"
               value={name}
-              onChange={(e) => { if (isComposing()) return; setName(e.target.value); }}
+              onChange={(e) => setName(e.target.value)}
               onCompositionStart={onCompositionStart}
-              onCompositionEnd={(e) => { onCompositionEnd(); }}
+              onCompositionEnd={onCompositionEnd}
               placeholder={placeholder}
               className="form-input w-full"
               autoFocus
