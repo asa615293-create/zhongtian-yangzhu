@@ -505,7 +505,7 @@ function createBathroomFields(prefix: string): DeliveryFieldCategory[] {
     {
       name: '花洒',
       fields: [
-        { key: `${prefix}_shower_brand`, label: '品牌', type: 'text', placeholder: '如：汉斯格雅、高仪、摩恩' },
+        { key: `${prefix}_shower_brand`, label: '品牌', type: 'text', placeholder: '如：TOTO、汉斯格雅、高仪、摩恩' },
         { key: `${prefix}_shower_model`, label: '型号', type: 'text', placeholder: '填写具体型号' },
         { key: `${prefix}_shower_type`, label: '类型', type: 'select', options: ['恒温', '普通', '其他'] },
       ],
