@@ -218,7 +218,7 @@ const BudgetPage: React.FC = () => {
           break;
         case 'actualAmount':
           cmp = (a.status === 'purchased' || a.status === 'installed' ? a.actualPrice ?? a.budgetMax ?? 0 : 0) -
-                (b.status === 'purchased' || b.status === 'installed' ? b.actualPrice ?? b.budgetMax ?? 0 : 0);
+            (b.status === 'purchased' || b.status === 'installed' ? b.actualPrice ?? b.budgetMax ?? 0 : 0);
           break;
         case 'status': {
           const order: Record<FurnishingItem['status'], number> = {
@@ -403,9 +403,8 @@ const BudgetPage: React.FC = () => {
             </div>
             <div className="h-1.5 bg-bg-card rounded-full overflow-hidden">
               <div
-                className={`h-full rounded-full transition-all duration-500 ${
-                  summary.isOverBudget ? 'bg-error' : 'bg-accent'
-                }`}
+                className={`h-full rounded-full transition-all duration-500 ${summary.isOverBudget ? 'bg-error' : 'bg-accent'
+                  }`}
                 style={{ width: `${Math.min(summary.allocationRate * 100, 100)}%` }}
               />
             </div>
@@ -438,9 +437,8 @@ const BudgetPage: React.FC = () => {
             </div>
             <div className="h-1.5 bg-bg-card rounded-full overflow-hidden">
               <div
-                className={`h-full rounded-full transition-all duration-500 ${
-                  summary.spentRate > 1 ? 'bg-error' : 'bg-success'
-                }`}
+                className={`h-full rounded-full transition-all duration-500 ${summary.spentRate > 1 ? 'bg-error' : 'bg-success'
+                  }`}
                 style={{ width: `${Math.min(summary.spentRate * 100, 100)}%` }}
               />
             </div>
@@ -449,16 +447,14 @@ const BudgetPage: React.FC = () => {
 
         {/* 剩余预算 */}
         <Card className="relative overflow-hidden">
-          <div className={`absolute top-0 left-0 w-full h-0.5 bg-gradient-to-r ${
-            summary.remaining >= 0 ? 'from-warning to-warning/20' : 'from-error to-error/20'
-          }`} />
+          <div className={`absolute top-0 left-0 w-full h-0.5 bg-gradient-to-r ${summary.remaining >= 0 ? 'from-warning to-warning/20' : 'from-error to-error/20'
+            }`} />
           <div className="flex items-center gap-2 mb-2">
             <TrendingDown className={`w-4 h-4 ${summary.remaining >= 0 ? 'text-warning' : 'text-error'}`} />
             <span className="text-xs text-text-muted uppercase tracking-wider">剩余预算</span>
           </div>
-          <p className={`text-xl font-display font-semibold ${
-            summary.remaining >= 0 ? 'text-warning' : 'text-error'
-          }`}>
+          <p className={`text-xl font-display font-semibold ${summary.remaining >= 0 ? 'text-warning' : 'text-error'
+            }`}>
             {summary.remaining >= 0 ? formatCurrency(summary.remaining) : `-${formatCurrency(Math.abs(summary.remaining))}`}
           </p>
           <p className="text-xs text-text-muted mt-2">
@@ -642,8 +638,8 @@ const BudgetPage: React.FC = () => {
                     item.budgetMin && item.budgetMax
                       ? `${formatCurrencyFull(item.budgetMin)} - ${formatCurrencyFull(item.budgetMax)}`
                       : item.budgetMax
-                      ? formatCurrencyFull(item.budgetMax)
-                      : '未设定';
+                        ? formatCurrencyFull(item.budgetMax)
+                        : '未设定';
 
                   return (
                     <tr
@@ -668,9 +664,8 @@ const BudgetPage: React.FC = () => {
                       </td>
                       <td className="px-3 py-3">
                         <span
-                          className={`text-sm font-medium ${
-                            actualAmount > 0 ? 'text-success' : 'text-text-muted'
-                          }`}
+                          className={`text-sm font-medium ${actualAmount > 0 ? 'text-success' : 'text-text-muted'
+                            }`}
                         >
                           {actualAmount > 0 ? formatCurrencyFull(actualAmount) : '-'}
                         </span>
