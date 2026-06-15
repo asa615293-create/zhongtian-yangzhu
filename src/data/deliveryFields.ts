@@ -20,6 +20,7 @@ const entranceFields: DeliveryFieldCategory[] = [
       { key: 'door_brand', label: '品牌', type: 'text', placeholder: '如：王力、步阳、盼盼' },
       { key: 'door_model', label: '型号', type: 'text', placeholder: '填写具体型号' },
       { key: 'door_material', label: '材质', type: 'select', options: ['钢质', '钢木质', '木质', '不锈钢', '铜质', '其他'] },
+      { key: 'door_type', label: '类型', type: 'select', options: ['子母双开门', '单开门', '双开门', '其他'] },
       { key: 'door_color', label: '颜色', type: 'text', placeholder: '如：深咖色、胡桃木色' },
       { key: 'door_color_code', label: '颜色色号', type: 'text', placeholder: '如：RAL色号' },
       { key: 'door_open_direction', label: '开启方向', type: 'select', options: ['内开左', '内开右', '外开左', '外开右'] },
@@ -151,7 +152,8 @@ const livingFields: DeliveryFieldCategory[] = [
   {
     name: '窗户',
     fields: [
-      { key: 'living_window_profile', label: '型材', type: 'select', options: ['断桥铝', '铝合金', '塑钢', '铝木复合', '其他'] },
+      { key: 'living_window_profile', label: '型材', type: 'select', options: ['系统门窗', '断桥铝', '铝合金', '塑钢', '铝木复合', '其他'] },
+      { key: 'living_window_profile_brand', label: '型材品牌', type: 'text', placeholder: '如：正典、凤铝、兴发' },
       { key: 'living_window_glass', label: '玻璃类型', type: 'select', options: ['单层', '双层中空', '三层中空', 'Low-E', '夹胶', '其他'] },
       { key: 'living_window_open_type', label: '开启方式', type: 'select', options: ['平开', '推拉', '上悬', '下悬', '固定', '内开内倒', '其他'] },
       { key: 'living_window_size', label: '尺寸', type: 'text', unit: 'mm', placeholder: '宽×高' },
@@ -282,17 +284,48 @@ const kitchenFields: DeliveryFieldCategory[] = [
     ],
   },
   {
-    name: '蒸箱烤箱',
+    name: '蒸烤炸一体机',
     fields: [
-      { key: 'kitchen_steam_oven_brand', label: '蒸箱品牌', type: 'text', placeholder: '填写品牌' },
-      { key: 'kitchen_steam_oven_model', label: '蒸箱型号', type: 'text', placeholder: '填写具体型号' },
-      { key: 'kitchen_steam_oven_position', label: '蒸箱位置', type: 'text', placeholder: '如：高柜内' },
-      { key: 'kitchen_oven_brand', label: '烤箱品牌', type: 'text', placeholder: '填写品牌' },
-      { key: 'kitchen_oven_model', label: '烤箱型号', type: 'text', placeholder: '填写具体型号' },
-      { key: 'kitchen_oven_position', label: '烤箱位置', type: 'text', placeholder: '如：高柜内' },
-      { key: 'kitchen_microwave_brand', label: '微波炉品牌', type: 'text', placeholder: '填写品牌' },
-      { key: 'kitchen_microwave_model', label: '微波炉型号', type: 'text', placeholder: '填写具体型号' },
-      { key: 'kitchen_microwave_position', label: '微波炉位置', type: 'text', placeholder: '如：吊柜内' },
+      { key: 'kitchen_steam_bake_brand', label: '品牌', type: 'text', placeholder: '如：欧派、西门子、美的' },
+      { key: 'kitchen_steam_bake_model', label: '型号', type: 'text', placeholder: '填写具体型号' },
+      { key: 'kitchen_steam_bake_install', label: '嵌入方式', type: 'select', options: ['全嵌', '半嵌', '独立式', '无', '不确定'] },
+      { key: 'kitchen_steam_bake_position', label: '位置', type: 'text', placeholder: '如：高柜内' },
+    ],
+  },
+  {
+    name: '垃圾处理器',
+    fields: [
+      { key: 'kitchen_disposer_brand', label: '品牌', type: 'text', placeholder: '如：维斯特姆、贝克巴斯、爱适易' },
+      { key: 'kitchen_disposer_model', label: '型号', type: 'text', placeholder: '填写具体型号' },
+      { key: 'kitchen_disposer_power', label: '电源预留', type: 'select', options: ['有', '无', '不确定'] },
+    ],
+  },
+  {
+    name: '燃气热水器',
+    fields: [
+      { key: 'kitchen_water_heater_brand', label: '品牌', type: 'text', placeholder: '如：林内、能率、万和' },
+      { key: 'kitchen_water_heater_model', label: '型号', type: 'text', placeholder: '填写具体型号' },
+      { key: 'kitchen_water_heater_position', label: '安装位置', type: 'text', placeholder: '如：厨房墙面、设备阳台' },
+      { key: 'kitchen_water_heater_capacity', label: '容量', type: 'select', options: ['13L', '16L', '20L', '其他'] },
+    ],
+  },
+  {
+    name: '前置过滤/净水机',
+    fields: [
+      { key: 'kitchen_pre_filter_brand', label: '前置过滤器品牌', type: 'text', placeholder: '如：飞利浦、3M、汉斯希尔' },
+      { key: 'kitchen_pre_filter_model', label: '前置过滤器型号', type: 'text', placeholder: '填写具体型号' },
+      { key: 'kitchen_water_purifier_brand', label: '净水机品牌', type: 'text', placeholder: '如：飞利浦、3M、沁园' },
+      { key: 'kitchen_water_purifier_model', label: '净水机型号', type: 'text', placeholder: '填写具体型号' },
+      { key: 'kitchen_water_purifier_position', label: '净水机位置', type: 'text', placeholder: '如：水槽下方' },
+    ],
+  },
+  {
+    name: '厨房门',
+    fields: [
+      { key: 'kitchen_door_type', label: '类型', type: 'select', options: ['多联动玻璃推拉门', '单扇推拉门', '平开门', '折叠门', '无门（开放式）', '其他'] },
+      { key: 'kitchen_door_brand', label: '品牌', type: 'text', placeholder: '填写品牌' },
+      { key: 'kitchen_door_color', label: '颜色', type: 'text', placeholder: '如：黑色、香槟金' },
+      { key: 'kitchen_door_size', label: '尺寸', type: 'text', unit: 'mm', placeholder: '宽×高' },
     ],
   },
   {
@@ -339,6 +372,16 @@ const kitchenFields: DeliveryFieldCategory[] = [
 // ─── 卧室通用字段（主卧/次卧/书房共用） ───
 function createBedroomFields(prefix: string): DeliveryFieldCategory[] {
   return [
+    {
+      name: '户内门',
+      fields: [
+        { key: `${prefix}_door_brand`, label: '品牌', type: 'text', placeholder: '如：欧派、TATA、梦天' },
+        { key: `${prefix}_door_model`, label: '型号', type: 'text', placeholder: '填写具体型号' },
+        { key: `${prefix}_door_material`, label: '材质', type: 'select', options: ['实木', '实木复合', '模压门', '钢木门', '其他'] },
+        { key: `${prefix}_door_color`, label: '颜色', type: 'text', placeholder: '如：白色、胡桃木色' },
+        { key: `${prefix}_door_size`, label: '尺寸', type: 'text', unit: 'mm', placeholder: '宽×高' },
+      ],
+    },
     {
       name: '地板',
       fields: [
@@ -488,6 +531,15 @@ function createBathroomFields(prefix: string): DeliveryFieldCategory[] {
         { key: `${prefix}_shower_brand`, label: '品牌', type: 'text', placeholder: '如：汉斯格雅、高仪、摩恩' },
         { key: `${prefix}_shower_model`, label: '型号', type: 'text', placeholder: '填写具体型号' },
         { key: `${prefix}_shower_type`, label: '类型', type: 'select', options: ['恒温', '普通', '其他'] },
+      ],
+    },
+    {
+      name: '淋浴屏',
+      fields: [
+        { key: `${prefix}_shower_screen_exists`, label: '有无', type: 'select', options: ['有', '无', '不确定'] },
+        { key: `${prefix}_shower_screen_brand`, label: '品牌', type: 'text', placeholder: '填写品牌' },
+        { key: `${prefix}_shower_screen_type`, label: '类型', type: 'select', options: ['固定玻璃隔断', '推拉式淋浴屏', '平开式淋浴屏', '钻石型淋浴屏', '其他'] },
+        { key: `${prefix}_shower_screen_size`, label: '尺寸', type: 'text', unit: 'mm', placeholder: '宽×高' },
       ],
     },
     {

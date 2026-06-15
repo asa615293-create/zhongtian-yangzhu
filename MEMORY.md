@@ -149,8 +149,13 @@ src/
   - 发版后必须检查服务器数据是否丢失（Railway 重建容器会清空 data.json），若丢失则从备份恢复
   - 用户可随时手动执行 `node scripts/backup.js` 备份数据到本地
   - 备份文件格式：`backups/backup_YYYY-MM-DD_HH-mm-ss.json`，自动清理30天以上的旧备份
-- **未完成**：
-  - GitHub push 因网络超时未成功，需用户手动在非沙箱终端执行 `git push origin main`
+- **系统配置红线**：
+  - **绝对不能修改系统级配置**（全局 git config、Windows 凭证、环境变量等），只能用 `git config --local` 修改项目级配置
+  - 这是工作电脑，环境不允许随意改动
+- **自主解决原则**：
+  - 遇到问题先自行尝试解决（如 git push 失败应多次重试，最多5次），只有穷尽所有方法后才找用户
+  - 不要把本可以自动解决的问题推给用户手动操作
+  - 公司网络可能不稳定，git push SSL 超时是常见问题，重试通常能成功
 
 ### 2026-06-11 对话 5（git-push-deploy Skill 调试）
 - **用户诉求**：调用 git-push-deploy Skill 执行 push 和发版
