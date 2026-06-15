@@ -1,7 +1,8 @@
 import { useLocation, useNavigate } from 'react-router-dom';
-import { Save, Download, ChevronLeft, Upload } from 'lucide-react';
+import { Save, Download, ChevronLeft, Upload, AlertTriangle } from 'lucide-react';
 import { useAppStore } from '@/store/useAppStore';
-import { useState, useRef } from 'react';
+import { isSaveError } from '@/store/useAppStore';
+import { useState, useRef, useEffect } from 'react';
 
 const routeLabels: Record<string, string> = {
   '/': '概览',
@@ -21,8 +22,17 @@ export default function TopBar() {
   const exportData = useAppStore((s) => s.exportData);
   const importData = useAppStore((s) => s.importData);
   const [saveNotice, setSaveNotice] = useState(false);
+  const [showSaveError, setShowSaveError] = useState(false);
   const importInputRefDesktop = useRef<HTMLInputElement>(null);
   const importInputRefMobile = useRef<HTMLInputElement>(null);
+
+  // 定期检查保存错误状态
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setShowSaveError(isSaveError());
+    }, 3000);
+    return () => clearInterval(interval);
+  }, []);
 
   const currentLabel = routeLabels[location.pathname] || '概览';
   const canGoBack = location.pathname !== '/';
@@ -83,7 +93,13 @@ export default function TopBar() {
           ))}
         </div>
         <div className="flex items-center gap-2">
-          {saveNotice && (
+          {showSaveError && (
+            <span className="flex items-center gap-1 text-xs text-red-400 mr-2">
+              <AlertTriangle size={12} />
+              保存失败
+            </span>
+          )}
+          {saveNotice && !showSaveError && (
             <span className="text-xs text-accent animate-pulse mr-2">已保存</span>
           )}
           <input ref={importInputRefDesktop} type="file" accept=".json" onChange={handleImport} className="hidden" />

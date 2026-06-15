@@ -15,6 +15,9 @@ RUN npm run build
 # 把构建产物移到服务端目录
 RUN cp -r dist server/dist
 
+# 创建持久化数据目录（Railway Volume 会挂载到这里）
+RUN mkdir -p /app/data
+
 # 暴露端口
 EXPOSE 3001
 

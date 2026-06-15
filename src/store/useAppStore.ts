@@ -582,6 +582,8 @@ export function setComposing(value: boolean) {
   isComposing = value;
 }
 
+let saveError = false;
+
 async function debouncedSave(data: AppData) {
   if (saveTimer) clearTimeout(saveTimer);
   saveTimer = setTimeout(async () => {
@@ -591,15 +593,26 @@ async function debouncedSave(data: AppData) {
       return;
     }
     try {
-      await fetch(`${API_BASE}/api/data`, {
+      const res = await fetch(`${API_BASE}/api/data`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data),
       });
+      if (res.ok) {
+        saveError = false;
+      } else {
+        saveError = true;
+        console.error('自动保存失败: HTTP', res.status);
+      }
     } catch (err) {
+      saveError = true;
       console.error('自动保存失败:', err);
     }
   }, 1000);
+}
+
+export function isSaveError() {
+  return saveError;
 }
 
 interface AppData {

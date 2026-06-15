@@ -9,7 +9,9 @@ const __dirname = path.dirname(__filename);
 
 const app = express();
 const PORT = process.env.PORT || 3001;
-const DATA_FILE = path.join(__dirname, 'data.json');
+// 优先使用持久化卷目录（Railway Volume 挂载点），回退到本地目录
+const DATA_DIR = fs.existsSync('/app/data') ? '/app/data' : __dirname;
+const DATA_FILE = path.join(DATA_DIR, 'data.json');
 const DIST_DIR = path.join(__dirname, 'dist');
 
 app.use(cors());
@@ -78,5 +80,20 @@ if (fs.existsSync(DIST_DIR)) {
 
 app.listen(PORT, () => {
   console.log(`服务端运行在端口 ${PORT}`);
+  console.log(`数据文件路径: ${DATA_FILE}`);
   console.log(`前端静态文件目录: ${DIST_DIR} (${fs.existsSync(DIST_DIR) ? '存在' : '不存在'})`);
+
+  // 启动时：如果持久化目录没有数据但本地有，自动迁移
+  if (DATA_DIR !== __dirname) {
+    const localDataFile = path.join(__dirname, 'data.json');
+    if (!fs.existsSync(DATA_FILE) && fs.existsSync(localDataFile)) {
+      try {
+        const data = fs.readFileSync(localDataFile, 'utf-8');
+        fs.writeFileSync(DATA_FILE, data, 'utf-8');
+        console.log('已将本地数据迁移到持久化卷');
+      } catch (err) {
+        console.error('数据迁移失败:', err);
+      }
+    }
+  }
 });
