@@ -17,10 +17,10 @@ const entranceFields: DeliveryFieldCategory[] = [
   {
     name: '入户门',
     fields: [
-      { key: 'door_brand', label: '品牌', type: 'text', placeholder: '如：王力、步阳、盼盼' },
-      { key: 'door_model', label: '型号', type: 'text', placeholder: '填写具体型号' },
       { key: 'door_material', label: '材质', type: 'select', options: ['钢质', '钢木质', '木质', '不锈钢', '铜质', '其他'] },
       { key: 'door_type', label: '类型', type: 'select', options: ['子母双开门', '单开门', '双开门', '其他'] },
+      { key: 'door_brand', label: '品牌', type: 'text', placeholder: '如：王力、步阳、盼盼' },
+      { key: 'door_model', label: '型号', type: 'text', placeholder: '填写具体型号' },
       { key: 'door_color', label: '颜色', type: 'text', placeholder: '如：深咖色、胡桃木色' },
       { key: 'door_color_code', label: '颜色色号', type: 'text', placeholder: '如：RAL色号' },
       { key: 'door_open_direction', label: '开启方向', type: 'select', options: ['内开左', '内开右', '外开左', '外开右'] },
@@ -30,9 +30,9 @@ const entranceFields: DeliveryFieldCategory[] = [
   {
     name: '门锁',
     fields: [
+      { key: 'lock_type', label: '类型', type: 'select', options: ['指纹', '密码', '人脸识别', '指纹+密码', '指纹+密码+人脸', '刷卡', '其他'] },
       { key: 'lock_brand', label: '品牌', type: 'text', placeholder: '如：德施曼、凯迪仕、鹿客' },
       { key: 'lock_model', label: '型号', type: 'text', placeholder: '填写具体型号' },
-      { key: 'lock_type', label: '类型', type: 'select', options: ['指纹', '密码', '人脸识别', '指纹+密码', '指纹+密码+人脸', '刷卡', '其他'] },
     ],
   },
   {
@@ -207,8 +207,8 @@ const kitchenFields: DeliveryFieldCategory[] = [
   {
     name: '橱柜',
     fields: [
-      { key: 'kitchen_cabinet_brand', label: '品牌', type: 'text', placeholder: '如：欧派、志邦、金牌' },
       { key: 'kitchen_cabinet_material', label: '材质', type: 'select', options: ['实木', '多层板', '颗粒板', '不锈钢', '其他'] },
+      { key: 'kitchen_cabinet_brand', label: '品牌', type: 'text', placeholder: '如：欧派、志邦、金牌' },
       { key: 'kitchen_cabinet_color', label: '颜色', type: 'text', placeholder: '如：白色、灰色' },
       { key: 'kitchen_cabinet_color_code', label: '颜色色号', type: 'text', placeholder: '如：RAL色号' },
       { key: 'kitchen_cabinet_countertop_material', label: '台面材质', type: 'select', options: ['石英石', '人造石', '不锈钢', '岩板', '大理石', '其他'] },
@@ -231,37 +231,37 @@ const kitchenFields: DeliveryFieldCategory[] = [
   {
     name: '水槽',
     fields: [
-      { key: 'kitchen_sink_brand', label: '品牌', type: 'text', placeholder: '如：摩恩、弗兰卡、欧琳' },
-      { key: 'kitchen_sink_model', label: '型号', type: 'text', placeholder: '填写具体型号' },
       { key: 'kitchen_sink_material', label: '材质', type: 'select', options: ['不锈钢', '石英石', '陶瓷', '铸铁', '其他'] },
       { key: 'kitchen_sink_install', label: '安装方式', type: 'select', options: ['台下盆', '台上盆', '平嵌', '其他'] },
+      { key: 'kitchen_sink_brand', label: '品牌', type: 'text', placeholder: '如：摩恩、弗兰卡、欧琳' },
+      { key: 'kitchen_sink_model', label: '型号', type: 'text', placeholder: '填写具体型号' },
     ],
   },
   {
     name: '龙头',
     fields: [
+      { key: 'kitchen_faucet_type', label: '类型', type: 'select', options: ['抽拉式', '固定式', '感应式', '其他'] },
       { key: 'kitchen_faucet_brand', label: '品牌', type: 'text', placeholder: '如：摩恩、高仪、汉斯格雅' },
       { key: 'kitchen_faucet_model', label: '型号', type: 'text', placeholder: '填写具体型号' },
-      { key: 'kitchen_faucet_type', label: '类型', type: 'select', options: ['抽拉式', '固定式', '感应式', '其他'] },
     ],
   },
   {
     name: '烟机灶具',
     fields: [
+      { key: 'kitchen_hood_color', label: '烟机颜色', type: 'select', options: ['不锈钢', '黑色', '白色', '其他'] },
       { key: 'kitchen_hood_brand', label: '烟机品牌', type: 'text', placeholder: '如：方太、老板、西门子' },
       { key: 'kitchen_hood_model', label: '烟机型号', type: 'text', placeholder: '填写具体型号' },
-      { key: 'kitchen_hood_color', label: '烟机颜色', type: 'select', options: ['不锈钢', '黑色', '白色', '其他'] },
+      { key: 'kitchen_stove_type', label: '灶具类型', type: 'select', options: ['燃气灶', '电磁炉', '气电两用', '其他'] },
       { key: 'kitchen_stove_brand', label: '灶具品牌', type: 'text', placeholder: '如：方太、老板、西门子' },
       { key: 'kitchen_stove_model', label: '灶具型号', type: 'text', placeholder: '填写具体型号' },
-      { key: 'kitchen_stove_type', label: '灶具类型', type: 'select', options: ['燃气灶', '电磁炉', '气电两用', '其他'] },
     ],
   },
   {
     name: '洗碗机',
     fields: [
+      { key: 'kitchen_dishwasher_install', label: '嵌入方式', type: 'select', options: ['全嵌', '半嵌', '独立式', '水槽式', '无', '不确定'] },
       { key: 'kitchen_dishwasher_brand', label: '品牌', type: 'text', placeholder: '如：西门子、美的、方太' },
       { key: 'kitchen_dishwasher_model', label: '型号', type: 'text', placeholder: '填写具体型号' },
-      { key: 'kitchen_dishwasher_install', label: '嵌入方式', type: 'select', options: ['全嵌', '半嵌', '独立式', '水槽式', '无', '不确定'] },
     ],
   },
   {
@@ -275,27 +275,27 @@ const kitchenFields: DeliveryFieldCategory[] = [
   {
     name: '蒸烤炸一体机',
     fields: [
+      { key: 'kitchen_steam_bake_install', label: '嵌入方式', type: 'select', options: ['全嵌', '半嵌', '独立式', '无', '不确定'] },
       { key: 'kitchen_steam_bake_brand', label: '品牌', type: 'text', placeholder: '如：欧派、西门子、美的' },
       { key: 'kitchen_steam_bake_model', label: '型号', type: 'text', placeholder: '填写具体型号' },
-      { key: 'kitchen_steam_bake_install', label: '嵌入方式', type: 'select', options: ['全嵌', '半嵌', '独立式', '无', '不确定'] },
       { key: 'kitchen_steam_bake_position', label: '位置', type: 'text', placeholder: '如：高柜内' },
     ],
   },
   {
     name: '垃圾处理器',
     fields: [
+      { key: 'kitchen_disposer_power', label: '电源预留', type: 'select', options: ['有', '无', '不确定'] },
       { key: 'kitchen_disposer_brand', label: '品牌', type: 'text', placeholder: '如：维斯特姆、贝克巴斯、爱适易' },
       { key: 'kitchen_disposer_model', label: '型号', type: 'text', placeholder: '填写具体型号' },
-      { key: 'kitchen_disposer_power', label: '电源预留', type: 'select', options: ['有', '无', '不确定'] },
     ],
   },
   {
     name: '燃气热水器',
     fields: [
+      { key: 'kitchen_water_heater_capacity', label: '容量', type: 'select', options: ['13L', '16L', '20L', '其他'] },
       { key: 'kitchen_water_heater_brand', label: '品牌', type: 'text', placeholder: '如：林内、能率、万和' },
       { key: 'kitchen_water_heater_model', label: '型号', type: 'text', placeholder: '填写具体型号' },
       { key: 'kitchen_water_heater_position', label: '安装位置', type: 'text', placeholder: '如：厨房墙面、设备阳台' },
-      { key: 'kitchen_water_heater_capacity', label: '容量', type: 'select', options: ['13L', '16L', '20L', '其他'] },
     ],
   },
   {
@@ -364,9 +364,9 @@ function createBedroomFields(prefix: string): DeliveryFieldCategory[] {
     {
       name: '户内门',
       fields: [
+        { key: `${prefix}_door_material`, label: '材质', type: 'select', options: ['实木', '实木复合', '模压门', '钢木门', '其他'] },
         { key: `${prefix}_door_brand`, label: '品牌', type: 'text', placeholder: '如：欧派、TATA、梦天' },
         { key: `${prefix}_door_model`, label: '型号', type: 'text', placeholder: '填写具体型号' },
-        { key: `${prefix}_door_material`, label: '材质', type: 'select', options: ['实木', '实木复合', '模压门', '钢木门', '其他'] },
         { key: `${prefix}_door_color`, label: '颜色', type: 'text', placeholder: '如：白色、胡桃木色' },
         { key: `${prefix}_door_size`, label: '尺寸', type: 'text', unit: 'mm', placeholder: '宽×高' },
       ],
@@ -374,9 +374,9 @@ function createBedroomFields(prefix: string): DeliveryFieldCategory[] {
     {
       name: '地板',
       fields: [
+        { key: `${prefix}_floor_material`, label: '材质', type: 'select', options: ['实木', '三层实木复合', '多层实木复合', '强化复合', 'SPC', '其他'] },
         { key: `${prefix}_floor_brand`, label: '品牌', type: 'text', placeholder: '如：大自然、圣象、德尔' },
         { key: `${prefix}_floor_model`, label: '型号', type: 'text', placeholder: '填写具体型号' },
-        { key: `${prefix}_floor_material`, label: '材质', type: 'select', options: ['实木', '三层实木复合', '多层实木复合', '强化复合', 'SPC', '其他'] },
         { key: `${prefix}_floor_color`, label: '颜色', type: 'text', placeholder: '如：橡木色、胡桃色' },
         { key: `${prefix}_floor_color_code`, label: '颜色色号', type: 'text', placeholder: '如：RAL色号' },
         { key: `${prefix}_floor_spec`, label: '规格', type: 'text', unit: 'mm', placeholder: '如：910×125×15' },
@@ -480,18 +480,18 @@ function createBathroomFields(prefix: string): DeliveryFieldCategory[] {
     {
       name: '马桶',
       fields: [
+        { key: `${prefix}_toilet_type`, label: '类型', type: 'select', options: ['智能马桶', '普通马桶', '壁挂马桶', '其他'] },
         { key: `${prefix}_toilet_brand`, label: '品牌', type: 'text', placeholder: '如：TOTO、科勒、箭牌' },
         { key: `${prefix}_toilet_model`, label: '型号', type: 'text', placeholder: '填写具体型号' },
-        { key: `${prefix}_toilet_type`, label: '类型', type: 'select', options: ['智能马桶', '普通马桶', '壁挂马桶', '其他'] },
         { key: `${prefix}_toilet_pit_distance`, label: '坑距', type: 'select', options: ['305mm', '400mm', '其他'], unit: 'mm' },
       ],
     },
     {
       name: '台盆',
       fields: [
+        { key: `${prefix}_basin_type`, label: '类型', type: 'select', options: ['台上盆', '台下盆', '一体盆', '立柱盆', '壁挂盆', '其他'] },
         { key: `${prefix}_basin_brand`, label: '品牌', type: 'text', placeholder: '如：TOTO、科勒、箭牌' },
         { key: `${prefix}_basin_model`, label: '型号', type: 'text', placeholder: '填写具体型号' },
-        { key: `${prefix}_basin_type`, label: '类型', type: 'select', options: ['台上盆', '台下盆', '一体盆', '立柱盆', '壁挂盆', '其他'] },
         { key: `${prefix}_basin_size`, label: '尺寸', type: 'text', unit: 'mm', placeholder: '宽×深×高' },
       ],
     },
@@ -505,17 +505,17 @@ function createBathroomFields(prefix: string): DeliveryFieldCategory[] {
     {
       name: '花洒',
       fields: [
+        { key: `${prefix}_shower_type`, label: '类型', type: 'select', options: ['恒温', '普通', '其他'] },
         { key: `${prefix}_shower_brand`, label: '品牌', type: 'text', placeholder: '如：TOTO、汉斯格雅、高仪、摩恩' },
         { key: `${prefix}_shower_model`, label: '型号', type: 'text', placeholder: '填写具体型号' },
-        { key: `${prefix}_shower_type`, label: '类型', type: 'select', options: ['恒温', '普通', '其他'] },
       ],
     },
     {
       name: '淋浴屏',
       fields: [
         { key: `${prefix}_shower_screen_exists`, label: '有无', type: 'select', options: ['有', '无', '不确定'] },
-        { key: `${prefix}_shower_screen_brand`, label: '品牌', type: 'text', placeholder: '填写品牌' },
         { key: `${prefix}_shower_screen_type`, label: '类型', type: 'select', options: ['固定玻璃隔断', '推拉式淋浴屏', '平开式淋浴屏', '钻石型淋浴屏', '其他'] },
+        { key: `${prefix}_shower_screen_brand`, label: '品牌', type: 'text', placeholder: '填写品牌' },
         { key: `${prefix}_shower_screen_size`, label: '尺寸', type: 'text', unit: 'mm', placeholder: '宽×高' },
       ],
     },
@@ -539,8 +539,8 @@ function createBathroomFields(prefix: string): DeliveryFieldCategory[] {
     {
       name: '卫浴柜',
       fields: [
-        { key: `${prefix}_vanity_brand`, label: '品牌', type: 'text', placeholder: '填写品牌' },
         { key: `${prefix}_vanity_material`, label: '材质', type: 'select', options: ['实木', '多层板', '颗粒板', '不锈钢', '其他'] },
+        { key: `${prefix}_vanity_brand`, label: '品牌', type: 'text', placeholder: '填写品牌' },
         { key: `${prefix}_vanity_color`, label: '颜色', type: 'text', placeholder: '如：白色、灰色' },
         { key: `${prefix}_vanity_size`, label: '尺寸', type: 'text', unit: 'mm', placeholder: '宽×深×高' },
       ],

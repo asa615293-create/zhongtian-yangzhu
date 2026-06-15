@@ -9,7 +9,7 @@ import Card from '@/components/common/Card';
 import FormField from '@/components/common/FormField';
 
 const DeliveryPage: React.FC = () => {
-  const { onCompositionStart, onCompositionEnd, isComposing } = useComposingInput();
+  const { onCompositionStart, onCompositionEnd } = useComposingInput();
   const rooms = useAppStore((s) => s.rooms);
   const deliverySpecs = useAppStore((s) => s.deliverySpecs);
   const updateDeliverySpec = useAppStore((s) => s.updateDeliverySpec);
@@ -53,9 +53,6 @@ const DeliveryPage: React.FC = () => {
         fieldKey,
         fieldLabel,
         value: '',
-        brand: '',
-        model: '',
-        colorCode: '',
         notes: '',
       };
     },
@@ -75,35 +72,6 @@ const DeliveryPage: React.FC = () => {
           fieldKey,
           fieldLabel,
           value,
-          brand: '',
-          model: '',
-          colorCode: '',
-          notes: '',
-        };
-        setDeliverySpecs(activeRoomId, [...roomSpecs, newSpec]);
-      }
-      showSaveIndicator();
-    },
-    [activeRoomId, getSpec, roomSpecs, setDeliverySpecs, updateDeliverySpec, showSaveIndicator]
-  );
-
-  const handleSubFieldChange = useCallback(
-    (fieldKey: string, fieldLabel: string, category: string, subField: 'brand' | 'model' | 'colorCode', value: string) => {
-      const spec = getSpec(fieldKey);
-      if (spec) {
-        updateDeliverySpec(activeRoomId, spec.id, { [subField]: value });
-      } else {
-        const newSpec: DeliverySpec = {
-          id: `${activeRoomId}-${fieldKey}`,
-          roomId: activeRoomId,
-          category,
-          fieldKey,
-          fieldLabel,
-          value: '',
-          [subField]: value,
-          brand: subField === 'brand' ? value : '',
-          model: subField === 'model' ? value : '',
-          colorCode: subField === 'colorCode' ? value : '',
           notes: '',
         };
         setDeliverySpecs(activeRoomId, [...roomSpecs, newSpec]);
@@ -127,9 +95,6 @@ const DeliveryPage: React.FC = () => {
           fieldKey: notesKey,
           fieldLabel: '分类备注',
           value,
-          brand: '',
-          model: '',
-          colorCode: '',
           notes: '',
         };
         setDeliverySpecs(activeRoomId, [...roomSpecs, newSpec]);
@@ -195,36 +160,6 @@ const DeliveryPage: React.FC = () => {
                         options={field.options}
                         unit={field.unit}
                       />
-                      {/* Sub-fields: Brand / Model / Color Code - stacked on mobile, 3-col on desktop */}
-                      <div className="grid grid-cols-3 gap-2 mt-1">
-                        <input
-                          type="text"
-                          value={spec?.brand || ''}
-                          onChange={(e) => handleSubFieldChange(field.key, field.label, category.name, 'brand', e.target.value)}
-                          onCompositionStart={onCompositionStart}
-                          onCompositionEnd={onCompositionEnd}
-                          placeholder="品牌"
-                          className="form-input w-full text-xs py-1 px-2"
-                        />
-                        <input
-                          type="text"
-                          value={spec?.model || ''}
-                          onChange={(e) => handleSubFieldChange(field.key, field.label, category.name, 'model', e.target.value)}
-                          onCompositionStart={onCompositionStart}
-                          onCompositionEnd={onCompositionEnd}
-                          placeholder="型号"
-                          className="form-input w-full text-xs py-1 px-2"
-                        />
-                        <input
-                          type="text"
-                          value={spec?.colorCode || ''}
-                          onChange={(e) => handleSubFieldChange(field.key, field.label, category.name, 'colorCode', e.target.value)}
-                          onCompositionStart={onCompositionStart}
-                          onCompositionEnd={onCompositionEnd}
-                          placeholder="色号"
-                          className="form-input w-full text-xs py-1 px-2"
-                        />
-                      </div>
                     </div>
                   );
                 })}

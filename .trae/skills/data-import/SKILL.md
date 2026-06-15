@@ -42,7 +42,7 @@ Based on the user's request, prepare the data to import. This could be:
 ```json
 {
   "property": { ... },
-  "deliverySpecs": { "roomId": [ { id, roomId, category, fieldKey, fieldLabel, value, brand, model, colorCode, notes } ] },
+  "deliverySpecs": { "roomId": [ { id, roomId, category, fieldKey, fieldLabel, value, notes } ] },
   "furnishingItems": [ { id, roomId, name, category, ... } ],
   "designSchemes": [ ... ],
   "budgetTarget": number

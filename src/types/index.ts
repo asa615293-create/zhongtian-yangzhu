@@ -29,9 +29,6 @@ export interface DeliverySpec {
   fieldKey: string;
   fieldLabel: string;
   value: string;
-  brand: string;
-  model: string;
-  colorCode: string;
   notes: string;
 }
 

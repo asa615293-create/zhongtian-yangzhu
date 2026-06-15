@@ -22,16 +22,16 @@ const Dashboard: React.FC = () => {
     const specs = deliverySpecs[room.id];
     if (!specs || specs.length === 0) return false;
     // 统计有实际内容的spec数量
-    const filledSpecs = specs.filter((spec) => spec.value || spec.brand || spec.model);
+    const filledSpecs = specs.filter((spec) => spec.value);
     return filledSpecs.length >= 2; // 至少2个字段有值才算已记录
   }).length;
 
   // 2. 三大件与智能化
   const systemsSpecs = deliverySpecs['systems'] || [];
-  const systemsFilled = systemsSpecs.filter((spec) => spec.value || spec.brand || spec.model).length;
+  const systemsFilled = systemsSpecs.filter((spec) => spec.value).length;
   const systemsTotal = 4; // 中央空调/新风/地暖/智能系统
   const systemsCategoriesFilled = ['中央空调', '新风系统', '地暖', '智能对讲', '智能灯光', '智能窗帘', '全屋WiFi'].filter((cat) => {
-    return systemsSpecs.some((spec) => spec.category === cat && (spec.value || spec.brand || spec.model));
+    return systemsSpecs.some((spec) => spec.category === cat && spec.value);
   }).length;
 
   // 3. 实景照片
