@@ -71,6 +71,12 @@ export interface FurnishingItem {
   matchingNotes: string;
   notes: string;
   referenceImages: ReferenceImage[];
+  // 全屋定制专用字段
+  pricingMode?: 'standard' | 'custom'; // standard=标准预算区间, custom=全屋定制投影面积计价
+  cabinetWidth?: number | null;  // 柜体宽度(mm)
+  cabinetHeight?: number | null; // 柜体高度(mm)
+  boardType?: string;  // 板材类型
+  unitPrice?: number | null;  // 投影面积单价(元/㎡)
 }
 
 export interface ReferenceImage {

@@ -22,6 +22,9 @@ This skill automates the workflow of committing code, pushing to the git remote 
    - `feat:` for new features
    - `chore:` for maintenance tasks
 5. **Push**: Run `git push` to push to the remote repository. The server will automatically deploy from the git push.
+   - **Network retry**: If push fails with SSL/connection error, retry up to 5 times. Company network may be unstable. Do NOT ask user to manually push until all retries exhausted.
+   - **Do NOT change remote URL** to SSH (SSH is not configured in sandbox).
+   - **Do NOT modify system-level git config** (only project-level with `--local`).
 6. **Verify Data**: After push, check if server data was lost during deployment by calling `GET /api/data`. If data is empty, restore from the latest backup in `backups/` directory by reading the file and `PUT /api/data`.
 
 ## Important Notes
@@ -35,3 +38,5 @@ This skill automates the workflow of committing code, pushing to the git remote 
 - If there are untracked files that are reference documents (调研报告, etc.), skip them — they should not be in the repo.
 - **NEVER overwrite server data** when deploying. Code changes and user data are separate. Only restore data if server lost it during deployment.
 - **Backup before every deployment** — this is mandatory, not optional.
+- **NEVER modify system-level configuration** — only use `git config --local` for project-level changes. This is a work computer, system config must not be touched.
+- **Self-resolve before asking user** — retry failed operations (especially git push) multiple times before asking user to manually intervene. Only escalate to user after exhausting all reasonable attempts.

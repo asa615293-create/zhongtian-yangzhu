@@ -36,17 +36,6 @@ const entranceFields: DeliveryFieldCategory[] = [
     ],
   },
   {
-    name: '鞋柜',
-    fields: [
-      { key: 'shoe_cabinet_brand', label: '品牌', type: 'text', placeholder: '如为开发商定制则填开发商' },
-      { key: 'shoe_cabinet_material', label: '材质', type: 'select', options: ['实木', '多层板', '颗粒板', '密度板', '不锈钢', '其他'] },
-      { key: 'shoe_cabinet_color', label: '颜色', type: 'text', placeholder: '如：白色、原木色' },
-      { key: 'shoe_cabinet_color_code', label: '颜色色号', type: 'text', placeholder: '如：RAL色号' },
-      { key: 'shoe_cabinet_layout', label: '内部格局', type: 'text', placeholder: '如：上翻门+下平开、层板数、有无抽屉' },
-      { key: 'shoe_cabinet_size', label: '尺寸', type: 'text', unit: 'mm', placeholder: '宽×深×高' },
-    ],
-  },
-  {
     name: '玄关灯',
     fields: [
       { key: 'entrance_light_type', label: '类型', type: 'select', options: ['筒灯', '射灯', '吸顶灯', '吊灯', '灯带', '感应灯', '其他'] },
@@ -394,18 +383,6 @@ function createBedroomFields(prefix: string): DeliveryFieldCategory[] {
       ],
     },
     {
-      name: '衣柜',
-      fields: [
-        { key: `${prefix}_wardrobe_exists`, label: '有无', type: 'select', options: ['有', '无', '不确定'] },
-        { key: `${prefix}_wardrobe_brand`, label: '品牌', type: 'text', placeholder: '如为开发商定制则填开发商' },
-        { key: `${prefix}_wardrobe_material`, label: '材质', type: 'select', options: ['实木', '多层板', '颗粒板', '密度板', '其他'] },
-        { key: `${prefix}_wardrobe_color`, label: '颜色', type: 'text', placeholder: '如：白色、原木色' },
-        { key: `${prefix}_wardrobe_color_code`, label: '颜色色号', type: 'text', placeholder: '如：RAL色号' },
-        { key: `${prefix}_wardrobe_layout`, label: '内部格局', type: 'text', placeholder: '如：挂衣区+叠放区+抽屉数' },
-        { key: `${prefix}_wardrobe_size`, label: '尺寸', type: 'text', unit: 'mm', placeholder: '宽×深×高' },
-      ],
-    },
-    {
       name: '床头背景墙',
       fields: [
         { key: `${prefix}_headboard_material`, label: '材质', type: 'select', options: ['乳胶漆', '壁布', '硬包', '软包', '木饰面', '其他'] },
@@ -652,31 +629,11 @@ const balconyFields: DeliveryFieldCategory[] = [
     ],
   },
   {
-    name: '晾衣架',
-    fields: [
-      { key: 'balcony_rack_exists', label: '有无', type: 'select', options: ['有', '无', '不确定'] },
-      { key: 'balcony_rack_type', label: '类型', type: 'select', options: ['电动晾衣架', '手动升降', '固定式', '其他'] },
-      { key: 'balcony_rack_power', label: '电源预留', type: 'select', options: ['有', '无', '不确定'] },
-    ],
-  },
-  {
     name: '洗衣机位',
     fields: [
       { key: 'balcony_washer_space', label: '预留尺寸', type: 'text', unit: 'mm', placeholder: '宽×深×高' },
       { key: 'balcony_washer_power', label: '电源', type: 'select', options: ['有', '无', '不确定'] },
       { key: 'balcony_washer_water', label: '上下水', type: 'select', options: ['有', '无', '不确定'] },
-    ],
-  },
-  {
-    name: '洗手台',
-    fields: [
-      { key: 'balcony_sink_exists', label: '有无', type: 'select', options: ['有', '无', '不确定'] },
-    ],
-  },
-  {
-    name: '储物柜',
-    fields: [
-      { key: 'balcony_cabinet_exists', label: '有无', type: 'select', options: ['有', '无', '不确定'] },
     ],
   },
   {
@@ -725,14 +682,6 @@ export const systemsFieldDefinitions: DeliveryFieldCategory[] = [
       { key: 'floor_heating_loop_master', label: '主卧回路', type: 'text', placeholder: '如：2路' },
       { key: 'floor_heating_loop_second', label: '次卧回路', type: 'text', placeholder: '如：2路' },
       { key: 'floor_heating_loop_study', label: '书房回路', type: 'text', placeholder: '如：1路' },
-    ],
-  },
-  {
-    name: '锅炉',
-    fields: [
-      { key: 'boiler_brand', label: '品牌', type: 'text', placeholder: '如：威能、博世、菲斯曼' },
-      { key: 'boiler_model', label: '型号', type: 'text', placeholder: '填写具体型号' },
-      { key: 'boiler_position', label: '位置', type: 'text', placeholder: '如：厨房、设备阳台' },
     ],
   },
   {

@@ -10,7 +10,25 @@ interface ItemDetailProps {
   onClose: () => void;
 }
 
-const categories = ['沙发', '床', '餐桌', '椅子', '茶几', '电视柜', '书桌', '衣柜', '窗帘', '灯具', '地毯', '挂画', '绿植', '家电', '其他'];
+const categories = ['沙发', '床', '餐桌', '椅子', '茶几', '电视柜', '书桌', '衣柜', '柜体', '窗帘', '灯具', '地毯', '挂画', '绿植', '家电', '其他'];
+
+const boardTypeOptions = [
+  'E0级颗粒板 (700-1100元/㎡)',
+  'ENF级颗粒板 (1200-1600元/㎡)',
+  'E0级多层实木板 (1400-1800元/㎡)',
+  'ENF级多层实木板 (1600-2000元/㎡)',
+  '实木贴皮板 (2000-3000元/㎡)',
+  '纯实木 (3000-4000元/㎡)',
+];
+
+const boardTypePriceMap: Record<string, [number, number]> = {
+  'E0级颗粒板 (700-1100元/㎡)': [700, 1100],
+  'ENF级颗粒板 (1200-1600元/㎡)': [1200, 1600],
+  'E0级多层实木板 (1400-1800元/㎡)': [1400, 1800],
+  'ENF级多层实木板 (1600-2000元/㎡)': [1600, 2000],
+  '实木贴皮板 (2000-3000元/㎡)': [2000, 3000],
+  '纯实木 (3000-4000元/㎡)': [3000, 4000],
+};
 
 const priorityOptions: { value: FurnishingItem['priority']; label: string }[] = [
   { value: 'must', label: '必买' },
@@ -58,6 +76,11 @@ const compressImage = (base64Data: string): Promise<string> => {
     img.onerror = () => resolve(base64Data);
     img.src = base64Data;
   });
+};
+
+// 判断品类是否为柜体类（适用全屋定制）
+const isCabinetCategory = (category: string) => {
+  return ['柜体', '衣柜', '电视柜', '鞋柜', '书柜', '餐边柜', '阳台柜', '储物柜'].includes(category);
 };
 
 const ItemDetail: React.FC<ItemDetailProps> = ({ item, onClose }) => {
@@ -112,6 +135,53 @@ const ItemDetail: React.FC<ItemDetailProps> = ({ item, onClose }) => {
         img.id === imageId ? { ...img, notes } : img
       ),
     });
+  };
+
+  // 全屋定制计价逻辑
+  const pricingMode = item.pricingMode || (isCabinetCategory(item.category) ? 'custom' : 'standard');
+  const isCustomPricing = pricingMode === 'custom';
+
+  // 投影面积计算
+  const projectedArea = (item.cabinetWidth && item.cabinetHeight)
+    ? ((item.cabinetWidth / 1000) * (item.cabinetHeight / 1000))
+    : 0;
+  const estimatedPrice = projectedArea && item.unitPrice
+    ? Math.round(projectedArea * item.unitPrice)
+    : 0;
+
+  // 板材选择时自动填充参考单价
+  const handleBoardTypeChange = (boardType: string) => {
+    const priceRange = boardTypePriceMap[boardType];
+    const midPrice = priceRange ? Math.round((priceRange[0] + priceRange[1]) / 2) : item.unitPrice;
+    update({ boardType, unitPrice: midPrice });
+  };
+
+  // 切换计价模式时自动计算预算
+  const handlePricingModeChange = (mode: 'standard' | 'custom') => {
+    if (mode === 'custom') {
+      update({
+        pricingMode: 'custom',
+        budgetMin: estimatedPrice || null,
+        budgetMax: estimatedPrice || null,
+      });
+    } else {
+      update({ pricingMode: 'standard' });
+    }
+  };
+
+  // 全屋定制参数变化时自动更新预算
+  const handleCustomPriceUpdate = (data: Partial<FurnishingItem>) => {
+    const updated = { ...item, ...data };
+    const w = updated.cabinetWidth;
+    const h = updated.cabinetHeight;
+    const p = updated.unitPrice;
+    if (w && h && p) {
+      const area = (w / 1000) * (h / 1000);
+      const price = Math.round(area * p);
+      update({ ...data, budgetMin: price, budgetMax: price });
+    } else {
+      update(data);
+    }
   };
 
   return (
@@ -214,34 +284,158 @@ const ItemDetail: React.FC<ItemDetailProps> = ({ item, onClose }) => {
               onChange={(v) => update({ brandPreference: v })}
               placeholder="例如：顾家、芝华仕"
             />
-            <div className="grid grid-cols-2 gap-3">
-              <div className="form-group">
-                <label className="form-label">预算下限</label>
-                <div className="relative">
-                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-text-muted">¥</span>
-                  <input
-                    type="number"
-                    value={item.budgetMin ?? ''}
-                    onChange={(e) => update({ budgetMin: e.target.value ? Number(e.target.value) : null })}
-                    placeholder="0"
-                    className="form-input w-full pl-7"
-                  />
-                </div>
-              </div>
-              <div className="form-group">
-                <label className="form-label">预算上限</label>
-                <div className="relative">
-                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-text-muted">¥</span>
-                  <input
-                    type="number"
-                    value={item.budgetMax ?? ''}
-                    onChange={(e) => update({ budgetMax: e.target.value ? Number(e.target.value) : null })}
-                    placeholder="0"
-                    className="form-input w-full pl-7"
-                  />
-                </div>
+
+            {/* 计价模式切换 */}
+            <div className="form-group">
+              <label className="form-label">计价模式</label>
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  onClick={() => handlePricingModeChange('standard')}
+                  className={`flex-1 py-2 px-3 rounded-lg text-sm font-medium border transition-colors ${
+                    !isCustomPricing
+                      ? 'bg-accent-muted border-accent/30 text-accent'
+                      : 'bg-bg-card border-border-subtle text-text-secondary hover:text-text-primary'
+                  }`}
+                >
+                  标准预算
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handlePricingModeChange('custom')}
+                  className={`flex-1 py-2 px-3 rounded-lg text-sm font-medium border transition-colors ${
+                    isCustomPricing
+                      ? 'bg-accent-muted border-accent/30 text-accent'
+                      : 'bg-bg-card border-border-subtle text-text-secondary hover:text-text-primary'
+                  }`}
+                >
+                  全屋定制
+                </button>
               </div>
             </div>
+
+            {isCustomPricing ? (
+              <>
+                {/* 全屋定制：投影面积计价 */}
+                <div className="form-group">
+                  <label className="form-label">板材类型</label>
+                  <select
+                    value={item.boardType || ''}
+                    onChange={(e) => handleBoardTypeChange(e.target.value)}
+                    className="form-input w-full appearance-none"
+                  >
+                    <option value="" disabled>选择板材类型</option>
+                    {boardTypeOptions.map((opt) => (
+                      <option key={opt} value={opt}>{opt}</option>
+                    ))}
+                  </select>
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="form-group">
+                    <label className="form-label">柜体宽度</label>
+                    <div className="relative">
+                      <input
+                        type="number"
+                        value={item.cabinetWidth ?? ''}
+                        onChange={(e) => handleCustomPriceUpdate({ cabinetWidth: e.target.value ? Number(e.target.value) : null })}
+                        placeholder="宽"
+                        className="form-input w-full text-center"
+                        min={0}
+                        step={100}
+                      />
+                      <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-text-muted">mm</span>
+                    </div>
+                  </div>
+                  <div className="form-group">
+                    <label className="form-label">柜体高度</label>
+                    <div className="relative">
+                      <input
+                        type="number"
+                        value={item.cabinetHeight ?? ''}
+                        onChange={(e) => handleCustomPriceUpdate({ cabinetHeight: e.target.value ? Number(e.target.value) : null })}
+                        placeholder="高"
+                        className="form-input w-full text-center"
+                        min={0}
+                        step={100}
+                      />
+                      <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-text-muted">mm</span>
+                    </div>
+                  </div>
+                </div>
+                <div className="form-group">
+                  <label className="form-label">投影面积单价</label>
+                  <div className="relative">
+                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-text-muted">¥</span>
+                    <input
+                      type="number"
+                      value={item.unitPrice ?? ''}
+                      onChange={(e) => handleCustomPriceUpdate({ unitPrice: e.target.value ? Number(e.target.value) : null })}
+                      placeholder="单价"
+                      className="form-input w-full pl-7"
+                      min={0}
+                      step={100}
+                    />
+                    <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-text-muted">元/㎡</span>
+                  </div>
+                </div>
+
+                {/* 投影面积计算结果 */}
+                {projectedArea > 0 && item.unitPrice ? (
+                  <div className="bg-bg-card rounded-lg p-3 border border-accent/20">
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="text-text-secondary">投影面积</span>
+                      <span className="text-text-primary font-medium">{projectedArea.toFixed(2)} ㎡</span>
+                    </div>
+                    <div className="flex items-center justify-between text-sm mt-1">
+                      <span className="text-text-secondary">计算方式</span>
+                      <span className="text-text-muted text-xs">{(item.cabinetWidth! / 1000).toFixed(1)}m × {(item.cabinetHeight! / 1000).toFixed(1)}m × {item.unitPrice}元/㎡</span>
+                    </div>
+                    <div className="gold-divider my-2" />
+                    <div className="flex items-center justify-between">
+                      <span className="text-accent font-medium">预估总价</span>
+                      <span className="text-accent font-display text-lg font-semibold">¥{estimatedPrice.toLocaleString('zh-CN')}</span>
+                    </div>
+                    <p className="text-xs text-text-muted mt-2">
+                      * 投影面积 = 柜体宽×高，不含深度；实际价格以商家报价为准，抽屉/五金/见光板等可能增项
+                    </p>
+                  </div>
+                ) : (
+                  <div className="bg-bg-card rounded-lg p-3 border border-border-subtle">
+                    <p className="text-xs text-text-muted">请填写柜体宽度、高度和单价，系统将自动计算投影面积和预估总价</p>
+                  </div>
+                )}
+              </>
+            ) : (
+              /* 标准预算区间 */
+              <div className="grid grid-cols-2 gap-3">
+                <div className="form-group">
+                  <label className="form-label">预算下限</label>
+                  <div className="relative">
+                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-text-muted">¥</span>
+                    <input
+                      type="number"
+                      value={item.budgetMin ?? ''}
+                      onChange={(e) => update({ budgetMin: e.target.value ? Number(e.target.value) : null })}
+                      placeholder="0"
+                      className="form-input w-full pl-7"
+                    />
+                  </div>
+                </div>
+                <div className="form-group">
+                  <label className="form-label">预算上限</label>
+                  <div className="relative">
+                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-text-muted">¥</span>
+                    <input
+                      type="number"
+                      value={item.budgetMax ?? ''}
+                      onChange={(e) => update({ budgetMax: e.target.value ? Number(e.target.value) : null })}
+                      placeholder="0"
+                      className="form-input w-full pl-7"
+                    />
+                  </div>
+                </div>
+              </div>
+            )}
           </section>
 
           {/* 优先级与状态 */}

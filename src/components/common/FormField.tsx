@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { Minus, Plus } from 'lucide-react';
 import { setComposing } from '@/store/useAppStore';
 
 interface SelectOption {
@@ -15,6 +16,9 @@ interface FormFieldProps {
   options?: string[] | SelectOption[];
   unit?: string;
   className?: string;
+  min?: number;
+  max?: number;
+  step?: number;
 }
 
 const isSelectOptionArray = (options: string[] | SelectOption[] | undefined): options is SelectOption[] => {
@@ -30,6 +34,9 @@ const FormField: React.FC<FormFieldProps> = ({
   options,
   unit,
   className,
+  min,
+  max,
+  step = 1,
 }) => {
   // 本地状态：组合输入期间用本地值显示，不更新父组件
   const [localValue, setLocalValue] = useState(value);
@@ -56,12 +63,28 @@ const FormField: React.FC<FormFieldProps> = ({
   }, [onChange]);
 
   const handleChange = useCallback((e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-    const newValue = (e.target as HTMLInputElement | HTMLTextAreaElement).value;
+    const newValue = (e.target as HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement).value;
     setLocalValue(newValue);
     if (!isComposingRef.current) {
       onChange(newValue);
     }
   }, [onChange]);
+
+  const handleStepDown = useCallback(() => {
+    const numVal = Number(localValue) || 0;
+    const newVal = Math.max(min ?? -Infinity, numVal - step);
+    const strVal = String(newVal);
+    setLocalValue(strVal);
+    onChange(strVal);
+  }, [localValue, min, step, onChange]);
+
+  const handleStepUp = useCallback(() => {
+    const numVal = Number(localValue) || 0;
+    const newVal = Math.min(max ?? Infinity, numVal + step);
+    const strVal = String(newVal);
+    setLocalValue(strVal);
+    onChange(strVal);
+  }, [localValue, max, step, onChange]);
 
   return (
     <div className={`form-group ${className || ''}`}>
@@ -101,6 +124,42 @@ const FormField: React.FC<FormFieldProps> = ({
           className="form-input w-full resize-none"
           rows={3}
         />
+      ) : type === 'number' ? (
+        <div className="flex items-stretch gap-0">
+          <button
+            type="button"
+            onClick={handleStepDown}
+            className="flex items-center justify-center w-9 rounded-l-lg bg-bg-card border border-r-0 border-border-subtle text-text-secondary hover:text-accent hover:border-accent/30 transition-colors"
+          >
+            <Minus className="w-3.5 h-3.5" />
+          </button>
+          <div className="relative flex-1">
+            <input
+              type="number"
+              value={localValue}
+              onChange={handleChange}
+              onCompositionStart={handleCompositionStart}
+              onCompositionEnd={handleCompositionEnd}
+              placeholder={placeholder}
+              className="form-input w-full text-center rounded-none border-x-0"
+              min={min}
+              max={max}
+              step={step}
+            />
+            {unit && (
+              <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-text-muted">
+                {unit}
+              </span>
+            )}
+          </div>
+          <button
+            type="button"
+            onClick={handleStepUp}
+            className="flex items-center justify-center w-9 rounded-r-lg bg-bg-card border border-l-0 border-border-subtle text-text-secondary hover:text-accent hover:border-accent/30 transition-colors"
+          >
+            <Plus className="w-3.5 h-3.5" />
+          </button>
+        </div>
       ) : (
         <div className="relative">
           <input

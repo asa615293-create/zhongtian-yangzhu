@@ -55,6 +55,16 @@
     @apply border-accent/50 ring-1 ring-accent/20;
   }
 
+  /* 隐藏数字输入框原生spinner */
+  input[type="number"]::-webkit-inner-spin-button,
+  input[type="number"]::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+  input[type="number"] {
+    -moz-appearance: textfield;
+  }
+
   textarea {
     resize: vertical;
     min-height: 80px;

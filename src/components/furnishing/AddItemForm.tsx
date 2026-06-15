@@ -93,6 +93,10 @@ const AddItemForm: React.FC<AddItemFormProps> = ({ roomId, onClose }) => {
     e.preventDefault();
     if (!name.trim()) return;
 
+    // 柜体类品类自动使用全屋定制模式
+    const cabinetCategories = ['柜体', '衣柜', '电视柜', '鞋柜', '书柜', '餐边柜', '阳台柜', '储物柜'];
+    const isCabinet = cabinetCategories.includes(category);
+
     const newItem: FurnishingItem = {
       id: generateId(),
       roomId: selectedRoomId,
@@ -111,6 +115,13 @@ const AddItemForm: React.FC<AddItemFormProps> = ({ roomId, onClose }) => {
       matchingNotes: '',
       notes: '',
       referenceImages: [],
+      pricingMode: isCabinet ? 'custom' : 'standard',
+      ...(isCabinet ? {
+        cabinetWidth: null,
+        cabinetHeight: null,
+        boardType: 'ENF级颗粒板 (1200-1600元/㎡)',
+        unitPrice: 1400,
+      } : {}),
     };
 
     addFurnishingItem(newItem);

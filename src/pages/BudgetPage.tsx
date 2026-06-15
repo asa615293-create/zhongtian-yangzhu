@@ -636,7 +636,9 @@ const BudgetPage: React.FC = () => {
                       : 0;
                   const budgetRange =
                     item.budgetMin && item.budgetMax
-                      ? `${formatCurrencyFull(item.budgetMin)} - ${formatCurrencyFull(item.budgetMax)}`
+                      ? item.budgetMin === item.budgetMax
+                        ? `${formatCurrencyFull(item.budgetMin)}${item.pricingMode === 'custom' ? ' (定制)' : ''}`
+                        : `${formatCurrencyFull(item.budgetMin)} - ${formatCurrencyFull(item.budgetMax)}`
                       : item.budgetMax
                         ? formatCurrencyFull(item.budgetMax)
                         : '未设定';
