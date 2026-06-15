@@ -36,6 +36,14 @@ const entranceFields: DeliveryFieldCategory[] = [
     ],
   },
   {
+    name: '玄关柜',
+    fields: [
+      { key: 'entrance_cabinet_brand', label: '品牌', type: 'text', placeholder: '如：欧派、索菲亚' },
+      { key: 'entrance_cabinet_material', label: '材质', type: 'select', options: ['颗粒板', '多层实木板', '实木', '其他'] },
+      { key: 'entrance_cabinet_color', label: '颜色', type: 'text', placeholder: '如：暖白色' },
+    ],
+  },
+  {
     name: '玄关灯',
     fields: [
       { key: 'entrance_light_type', label: '类型', type: 'select', options: ['筒灯', '射灯', '吸顶灯', '吊灯', '灯带', '感应灯', '其他'] },
@@ -580,7 +588,7 @@ function createBathroomFields(prefix: string): DeliveryFieldCategory[] {
     {
       name: '墙面',
       fields: [
-        { key: `${prefix}_wall_material`, label: '材质', type: 'select', options: ['瓷砖', '釉面砖', '大理石', '其他'] },
+        { key: `${prefix}_wall_material`, label: '材质', type: 'select', options: ['瓷砖', '釉面砖', '大理石', '岩板', '其他'] },
         { key: `${prefix}_wall_brand`, label: '品牌', type: 'text', placeholder: '填写品牌' },
         { key: `${prefix}_wall_color`, label: '颜色', type: 'text', placeholder: '如：白色、灰色' },
         { key: `${prefix}_wall_color_code`, label: '颜色色号', type: 'text', placeholder: '如：RAL色号' },
