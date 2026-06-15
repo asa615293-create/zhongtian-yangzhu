@@ -98,12 +98,4 @@ export interface DesignScheme {
   notes: string;
 }
 
-export interface BudgetRecord {
-  id: string;
-  itemId: string;
-  category: string;
-  roomId: string;
-  budgetAmount: number;
-  actualAmount: number;
-  notes: string;
-}
+

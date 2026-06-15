@@ -9,13 +9,7 @@ import EmptyState from '@/components/common/EmptyState';
 import ItemCard from '@/components/furnishing/ItemCard';
 import ItemDetail from '@/components/furnishing/ItemDetail';
 import AddItemForm from '@/components/furnishing/AddItemForm';
-
-const statusLabels: Record<FurnishingItem['status'], string> = {
-  pending: '待选',
-  selected: '已选',
-  purchased: '已购',
-  installed: '已安装',
-};
+import { statusLabels } from '@/constants/furnishing';
 
 const FurnishingPage: React.FC = () => {
   const { roomId: routeRoomId } = useParams<{ roomId: string }>();

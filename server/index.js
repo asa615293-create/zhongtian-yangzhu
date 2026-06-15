@@ -31,7 +31,9 @@ function readData() {
 // 写入数据
 function writeData(data) {
   try {
-    fs.writeFileSync(DATA_FILE, JSON.stringify(data, null, 2), 'utf-8');
+    const tmpFile = DATA_FILE + '.tmp';
+    fs.writeFileSync(tmpFile, JSON.stringify(data, null, 2), 'utf-8');
+    fs.renameSync(tmpFile, DATA_FILE);
     return true;
   } catch (err) {
     console.error('写入数据失败:', err);

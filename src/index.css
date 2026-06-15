@@ -55,6 +55,11 @@
     @apply border-accent/50 ring-1 ring-accent/20;
   }
 
+  select option {
+    background-color: #2C2C2E;
+    color: #F5F0EB;
+  }
+
   /* 隐藏数字输入框原生spinner */
   input[type="number"]::-webkit-inner-spin-button,
   input[type="number"]::-webkit-outer-spin-button {
@@ -77,9 +82,11 @@
     @apply transition-colors duration-150;
   }
 
-  .card-hover:hover {
-    @apply bg-bg-card -translate-y-0.5;
-    @apply shadow-lg shadow-black/20;
+  @media (hover: hover) {
+    .card-hover:hover {
+      @apply bg-bg-card -translate-y-0.5;
+      @apply shadow-lg shadow-black/20;
+    }
   }
 
   .section-title {

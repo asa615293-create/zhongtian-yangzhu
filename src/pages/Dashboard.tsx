@@ -249,11 +249,9 @@ const Dashboard: React.FC = () => {
           {quickActions.map((action) => {
             const Icon = action.icon;
             return (
-              <Link key={action.label} to={action.link}>
-                <button className="btn-secondary w-full flex items-center justify-center gap-2 py-3">
-                  <Icon className="w-4 h-4 text-accent" />
-                  <span className="text-sm">{action.label}</span>
-                </button>
+              <Link key={action.label} to={action.link} className="btn-secondary w-full flex items-center justify-center gap-2 py-3">
+                <Icon className="w-4 h-4 text-accent" />
+                <span className="text-sm">{action.label}</span>
               </Link>
             );
           })}

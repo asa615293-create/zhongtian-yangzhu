@@ -7,7 +7,6 @@ import type {
   Measurement,
   FurnishingItem,
   DesignScheme,
-  BudgetRecord,
 } from '../types';
 import { defaultRooms } from '../data/rooms';
 
@@ -611,7 +610,6 @@ interface AppData {
   measurements: Record<string, Measurement[]>;
   furnishingItems: FurnishingItem[];
   designSchemes: DesignScheme[];
-  budgetRecords: BudgetRecord[];
   budgetTarget: number;
 }
 
@@ -644,11 +642,6 @@ interface AppStore extends AppData {
   addDesignScheme: (scheme: DesignScheme) => void;
   updateDesignScheme: (id: string, data: Partial<DesignScheme>) => void;
   removeDesignScheme: (id: string) => void;
-
-  // 预算记录操作
-  addBudgetRecord: (record: BudgetRecord) => void;
-  updateBudgetRecord: (id: string, data: Partial<BudgetRecord>) => void;
-  removeBudgetRecord: (id: string) => void;
 
   // 软装总预算操作
   updateBudgetTarget: (amount: number) => void;
@@ -686,7 +679,6 @@ function triggerSave(state: AppData) {
     measurements: state.measurements,
     furnishingItems: state.furnishingItems,
     designSchemes: state.designSchemes,
-    budgetRecords: state.budgetRecords,
     budgetTarget: state.budgetTarget,
   };
   debouncedSave(data);
@@ -701,7 +693,6 @@ export const useAppStore = create<AppStore>()((set, get) => ({
   measurements: {},
   furnishingItems: defaultFurnishingItems,
   designSchemes: [],
-  budgetRecords: [],
   budgetTarget: 150000,
 
   // 从服务器加载数据
@@ -719,7 +710,6 @@ export const useAppStore = create<AppStore>()((set, get) => ({
             measurements: data.measurements || {},
             furnishingItems: data.furnishingItems?.length ? data.furnishingItems : defaultFurnishingItems,
             designSchemes: data.designSchemes || [],
-            budgetRecords: data.budgetRecords || [],
             budgetTarget: data.budgetTarget || 150000,
             loaded: true,
           });
@@ -908,34 +898,6 @@ export const useAppStore = create<AppStore>()((set, get) => ({
       return next;
     }),
 
-  // 预算记录操作
-  addBudgetRecord: (record) =>
-    set((state) => {
-      const next = { budgetRecords: [...state.budgetRecords, record] };
-      triggerSave({ ...state, ...next });
-      return next;
-    }),
-
-  updateBudgetRecord: (id, data) =>
-    set((state) => {
-      const next = {
-        budgetRecords: state.budgetRecords.map((record) =>
-          record.id === id ? { ...record, ...data } : record
-        ),
-      };
-      triggerSave({ ...state, ...next });
-      return next;
-    }),
-
-  removeBudgetRecord: (id) =>
-    set((state) => {
-      const next = {
-        budgetRecords: state.budgetRecords.filter((record) => record.id !== id),
-      };
-      triggerSave({ ...state, ...next });
-      return next;
-    }),
-
   updateBudgetTarget: (amount) =>
     set((state) => {
       const next = { budgetTarget: amount };
@@ -954,7 +916,6 @@ export const useAppStore = create<AppStore>()((set, get) => ({
       measurements: state.measurements,
       furnishingItems: state.furnishingItems,
       designSchemes: state.designSchemes,
-      budgetRecords: state.budgetRecords,
       budgetTarget: state.budgetTarget,
       exportDate: new Date().toISOString(),
       version: '1.0.0',
@@ -965,16 +926,67 @@ export const useAppStore = create<AppStore>()((set, get) => ({
   importData: (json) => {
     try {
       const data = JSON.parse(json);
+      const state = get();
+
+      // Merge deliverySpecs: import overwrites existing keys, preserves keys not in import
+      const mergedDeliverySpecs = { ...state.deliverySpecs };
+      if (data.deliverySpecs) {
+        for (const [roomId, specs] of Object.entries(data.deliverySpecs)) {
+          mergedDeliverySpecs[roomId] = specs as DeliverySpec[];
+        }
+      }
+
+      // Merge photos: import overwrites existing keys, preserves keys not in import
+      const mergedPhotos = { ...state.photos };
+      if (data.photos) {
+        for (const [roomId, photos] of Object.entries(data.photos)) {
+          mergedPhotos[roomId] = photos as Photo[];
+        }
+      }
+
+      // Merge measurements: same approach
+      const mergedMeasurements = { ...state.measurements };
+      if (data.measurements) {
+        for (const [roomId, measurements] of Object.entries(data.measurements)) {
+          mergedMeasurements[roomId] = measurements as Measurement[];
+        }
+      }
+
+      // Merge furnishingItems: add new items, update existing by id
+      const mergedItems = [...state.furnishingItems];
+      if (data.furnishingItems?.length) {
+        for (const item of data.furnishingItems) {
+          const idx = mergedItems.findIndex((i) => i.id === item.id);
+          if (idx >= 0) {
+            mergedItems[idx] = item;
+          } else {
+            mergedItems.push(item);
+          }
+        }
+      }
+
+      // Merge designSchemes: add new, update existing by id
+      const mergedSchemes = [...state.designSchemes];
+      if (data.designSchemes?.length) {
+        for (const scheme of data.designSchemes) {
+          const idx = mergedSchemes.findIndex((s) => s.id === scheme.id);
+          if (idx >= 0) {
+            mergedSchemes[idx] = scheme;
+          } else {
+            mergedSchemes.push(scheme);
+          }
+        }
+      }
+
       const next = {
-        property: data.property || defaultProperty,
-        rooms: data.rooms || defaultRooms,
-        deliverySpecs: data.deliverySpecs || {},
-        photos: data.photos || {},
-        measurements: data.measurements || {},
-        furnishingItems: data.furnishingItems?.length ? data.furnishingItems : defaultFurnishingItems,
-        designSchemes: data.designSchemes || [],
-        budgetRecords: data.budgetRecords || [],
-        budgetTarget: data.budgetTarget || 150000,
+        property: data.property || state.property,
+        rooms: data.rooms || state.rooms,
+        deliverySpecs: mergedDeliverySpecs,
+        photos: mergedPhotos,
+        measurements: mergedMeasurements,
+        furnishingItems: mergedItems,
+        designSchemes: mergedSchemes,
+        budgetTarget: data.budgetTarget || state.budgetTarget,
       };
       set(next);
       triggerSave({ ...get(), ...next });

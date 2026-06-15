@@ -3,24 +3,12 @@ import { Image } from 'lucide-react';
 import type { FurnishingItem } from '@/types';
 import Card from '@/components/common/Card';
 import Badge from '@/components/common/Badge';
+import { statusLabels, priorityLabels } from '@/constants/furnishing';
 
 interface ItemCardProps {
   item: FurnishingItem;
   onClick: () => void;
 }
-
-const priorityLabels: Record<FurnishingItem['priority'], string> = {
-  must: '必买',
-  recommended: '建议买',
-  optional: '可选',
-};
-
-const statusLabels: Record<FurnishingItem['status'], string> = {
-  pending: '待选',
-  selected: '已选',
-  purchased: '已购',
-  installed: '已安装',
-};
 
 const ItemCard: React.FC<ItemCardProps> = ({ item, onClick }) => {
   const hasBudget = item.budgetMin !== null && item.budgetMax !== null;

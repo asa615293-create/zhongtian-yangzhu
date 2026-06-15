@@ -3,14 +3,13 @@ import { X, ChevronLeft } from 'lucide-react';
 import { useAppStore } from '@/store/useAppStore';
 import type { FurnishingItem } from '@/types';
 import { useComposingInput } from '@/hooks/useComposingInput';
+import { generateId } from '@/utils/id';
+import { cabinetCategories } from '@/constants/furnishing';
 
 interface AddItemFormProps {
   roomId: string;
   onClose: () => void;
 }
-
-const generateId = () =>
-  Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
 
 // 按空间推荐品类映射
 const roomCategoryMap: Record<string, string[]> = {
@@ -94,7 +93,6 @@ const AddItemForm: React.FC<AddItemFormProps> = ({ roomId, onClose }) => {
     if (!name.trim()) return;
 
     // 柜体类品类自动使用全屋定制模式
-    const cabinetCategories = ['柜体', '衣柜', '电视柜', '鞋柜', '书柜', '餐边柜', '阳台柜', '储物柜'];
     const isCabinet = cabinetCategories.includes(category);
 
     const newItem: FurnishingItem = {

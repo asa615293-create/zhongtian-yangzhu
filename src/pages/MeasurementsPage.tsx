@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useRef } from 'react';
+import React, { useState, useCallback, useRef, useEffect } from 'react';
 import { Ruler, Plus, Trash2, Upload, X, Save } from 'lucide-react';
 import { useAppStore } from '@/store/useAppStore';
 import type { Measurement } from '@/types';
@@ -16,6 +16,7 @@ const MeasurementsPage: React.FC = () => {
   const [activeRoomId, setActiveRoomId] = useState(rooms[0]?.id || 'entrance');
   const [saveIndicator, setSaveIndicator] = useState(false);
   const sketchInputRef = useRef<HTMLInputElement>(null);
+  const saveTimerRef = useRef<ReturnType<typeof setTimeout>>();
 
   // Sketch photos stored in a special key in measurements
   const sketchKey = `__sketch_${activeRoomId}`;
@@ -26,7 +27,14 @@ const MeasurementsPage: React.FC = () => {
 
   const showSaveIndicator = useCallback(() => {
     setSaveIndicator(true);
-    setTimeout(() => setSaveIndicator(false), 2000);
+    if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
+    saveTimerRef.current = setTimeout(() => setSaveIndicator(false), 2000);
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
+    };
   }, []);
 
   const handleAddRow = useCallback(() => {
@@ -310,7 +318,7 @@ const MeasurementsPage: React.FC = () => {
                 />
                 <button
                   onClick={() => handleRemoveSketch(sketch.id)}
-                  className="absolute top-1 right-1 p-1 rounded-full bg-black/50 text-white opacity-0 group-hover:opacity-100 transition-opacity"
+                  className="absolute top-1 right-1 p-1 rounded-full bg-black/50 text-white md:opacity-0 md:group-hover:opacity-100 transition-opacity"
                 >
                   <X className="w-3 h-3" />
                 </button>

@@ -28,6 +28,7 @@ import { useAppStore } from '@/store/useAppStore';
 import type { FurnishingItem } from '@/types';
 import Card from '@/components/common/Card';
 import Badge from '@/components/common/Badge';
+import { statusLabels } from '@/constants/furnishing';
 
 // ─── Chart Colors ───────────────────────────────────────────────────────────────
 const CHART_COLORS = [
@@ -97,17 +98,23 @@ const CustomBarTooltip: React.FC<CustomTooltipProps> = ({ active, payload }) => 
   );
 };
 
-// ─── Status Labels ──────────────────────────────────────────────────────────────
-const statusLabels: Record<FurnishingItem['status'], string> = {
-  pending: '待选',
-  selected: '已选',
-  purchased: '已购',
-  installed: '已安装',
-};
-
 // ─── Sort Types ─────────────────────────────────────────────────────────────────
 type SortField = 'name' | 'room' | 'category' | 'budgetMax' | 'actualAmount' | 'status';
 type SortDir = 'asc' | 'desc';
+
+const SortHeader: React.FC<{ field: SortField; label: string; sortField: SortField; sortDir: SortDir; onSort: (field: SortField) => void }> = ({ field, label, sortField, sortDir, onSort }) => (
+  <th
+    className="px-3 py-3 text-left text-xs font-medium text-text-muted uppercase tracking-wider cursor-pointer hover:text-text-secondary transition-colors"
+    onClick={() => onSort(field)}
+  >
+    <div className="flex items-center gap-1">
+      {label}
+      <ArrowUpDown
+        className={`w-3 h-3 ${sortField === field ? 'text-accent' : 'text-text-muted/50'}`}
+      />
+    </div>
+  </th>
+);
 
 // ─── BudgetPage ─────────────────────────────────────────────────────────────────
 const BudgetPage: React.FC = () => {
@@ -302,20 +309,6 @@ const BudgetPage: React.FC = () => {
     link.click();
     URL.revokeObjectURL(url);
   };
-
-  const SortHeader: React.FC<{ field: SortField; label: string }> = ({ field, label }) => (
-    <th
-      className="px-3 py-3 text-left text-xs font-medium text-text-muted uppercase tracking-wider cursor-pointer hover:text-text-secondary transition-colors"
-      onClick={() => handleSort(field)}
-    >
-      <div className="flex items-center gap-1">
-        {label}
-        <ArrowUpDown
-          className={`w-3 h-3 ${sortField === field ? 'text-accent' : 'text-text-muted/50'}`}
-        />
-      </div>
-    </th>
-  );
 
   return (
     <div className="fade-in">
@@ -618,12 +611,12 @@ const BudgetPage: React.FC = () => {
             <table className="w-full min-w-[540px]">
               <thead>
                 <tr className="border-b border-border-subtle">
-                  <SortHeader field="name" label="物品名称" />
-                  <SortHeader field="room" label="所属空间" />
-                  <SortHeader field="category" label="品类" />
-                  <SortHeader field="budgetMax" label="预算区间" />
-                  <SortHeader field="actualAmount" label="实际支出" />
-                  <SortHeader field="status" label="状态" />
+                  <SortHeader field="name" label="物品名称" sortField={sortField} sortDir={sortDir} onSort={handleSort} />
+                  <SortHeader field="room" label="所属空间" sortField={sortField} sortDir={sortDir} onSort={handleSort} />
+                  <SortHeader field="category" label="品类" sortField={sortField} sortDir={sortDir} onSort={handleSort} />
+                  <SortHeader field="budgetMax" label="预算区间" sortField={sortField} sortDir={sortDir} onSort={handleSort} />
+                  <SortHeader field="actualAmount" label="实际支出" sortField={sortField} sortDir={sortDir} onSort={handleSort} />
+                  <SortHeader field="status" label="状态" sortField={sortField} sortDir={sortDir} onSort={handleSort} />
                 </tr>
               </thead>
               <tbody>

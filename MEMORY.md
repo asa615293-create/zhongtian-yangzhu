@@ -232,6 +232,39 @@ src/
 | 可视对讲   |                                                          | 户内智能化系统       |
 | 其他       | 燃气入户，有线电视/电话/网络/给水/电等由业主自行申请开通 |                      |
 
+### 2026-06-15 对话 7（全面系统优化 + data-import Skill）
+
+- **用户诉求**：全面扫描项目问题并修复，解决数据导入痛点，创建安全导入 Skill
+- **已完成（代码优化）**：
+  - **移动端删除/替换按钮修复**：所有 `opacity-0 group-hover:opacity-100` 改为 `md:opacity-0 md:group-hover:opacity-100`，移动端始终可见
+  - **房屋属性可编辑**：ArchivePage 添加编辑模式，支持修改所有基础信息
+  - **TopBar 保存提示修复**：添加导入按钮，导入后显示"已保存"提示
+  - **照片上传支持多选**：PhotoUploader 添加 `multiple` 属性
+  - **Dashboard 快捷操作修复**：移除 Link 内嵌套 button 的无效 HTML
+  - **重复代码提取**：compressImage → utils/image.ts，generateId → utils/id.ts，labels/categories → constants/furnishing.ts
+  - **BudgetPage SortHeader 提取**：从函数体内移到外部，避免重复创建
+  - **CSS 样式优化**：select option 暗色模式样式、card-hover 仅 hover 设备生效、色彩条 hover 不再跳动
+  - **MeasurementsPage 定时器修复**：添加 useRef + useEffect 清理
+  - **服务器原子写入**：writeData 先写 .tmp 再 rename，避免中断导致数据损坏
+  - **importData 合并模式**：不再全量替换，改为按 id/roomId 合并，保留用户已有数据
+  - **BudgetRecord 死代码清理**：删除未使用的接口和方法
+  - **创建 data-import Skill**：`.trae/skills/data-import/SKILL.md`，6步安全导入流程
+
+- **用户诉求**：解决数据导入痛点（导入出错数据消失、导入前不导出/不备份、导入数据不全面），制定安全流程并形成 Skill
+- **已完成**：
+  - **创建 safe-data-import Skill**：`.trae/skills/safe-data-import/SKILL.md`，定义6步安全导入流程
+  - **创建安全导入脚本**：`scripts/safe-import.mjs`，自动执行6步流程
+  - **网络查询产品规格**：高仪39932SH0、TOTO TBW12410C、西门子KF88E1220C、飞利浦AUT9415/93、唯斯特姆1790-RS
+  - **执行首次安全导入**：新增27项交付标准 + 6项软装物品，补全37项交付标准，跳过43项用户已填数据
+- **6步安全流程**：
+  1. 导出当前服务器数据（GET /api/data）
+  2. 创建时间戳备份（backups/backup_XXX.json）
+  3. 准备新数据（含网络查询产品详情）
+  4. 智能合并（只填空字段，不覆盖用户数据）
+  5. 验证并上传（检查数据不减少）
+  6. 验证上传成功（确认数据完整）
+- **核心原则**：绝对不覆盖用户已填数据，只补全空白字段；每次导入前必须备份
+
 ### 2026-06-11 对话 5（git-push-deploy Skill 调试）
 
 - **用户诉求**：调用 git-push-deploy Skill 执行 push 和发版
@@ -289,7 +322,9 @@ src/
 - [X] 精装标准移除不存在项目（鞋柜/衣柜/晾衣架/洗手台/储物柜/锅炉）
 - [X] 修复数字输入组件（自定义步进器替代原生spinner）
 - [X] 软装柜体全屋定制投影面积计价模式
-- [ ] 用户实际使用后根据反馈迭代
+- [X] 创建 data-import Skill（替代原 safe-data-import）
+- [X] 全面系统优化（移动端/样式/代码质量/数据安全）
+- [ ] 补全服务器缺失数据（品牌型号规格等）
 
 ## 重要参考文件
 

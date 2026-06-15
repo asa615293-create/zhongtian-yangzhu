@@ -1,7 +1,7 @@
 import { useLocation, useNavigate } from 'react-router-dom';
-import { Save, Download, ChevronLeft } from 'lucide-react';
+import { Save, Download, ChevronLeft, Upload } from 'lucide-react';
 import { useAppStore } from '@/store/useAppStore';
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 
 const routeLabels: Record<string, string> = {
   '/': '概览',
@@ -19,12 +19,14 @@ export default function TopBar() {
   const location = useLocation();
   const navigate = useNavigate();
   const exportData = useAppStore((s) => s.exportData);
+  const importData = useAppStore((s) => s.importData);
   const [saveNotice, setSaveNotice] = useState(false);
+  const importInputRefDesktop = useRef<HTMLInputElement>(null);
+  const importInputRefMobile = useRef<HTMLInputElement>(null);
 
   const currentLabel = routeLabels[location.pathname] || '概览';
   const canGoBack = location.pathname !== '/';
 
-  // Build breadcrumb for desktop
   const segments = location.pathname.split('/').filter(Boolean);
   const breadcrumbs: { label: string; path: string }[] = [{ label: '概览', path: '/' }];
   let accumulated = '';
@@ -47,19 +49,31 @@ export default function TopBar() {
     URL.revokeObjectURL(url);
   };
 
+  const handleImport = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const json = event.target?.result as string;
+      if (json) {
+        importData(json);
+        setSaveNotice(true);
+        setTimeout(() => setSaveNotice(false), 3000);
+      }
+    };
+    reader.readAsText(file);
+    e.target.value = '';
+  };
+
   return (
     <header className="sticky top-0 z-20 bg-bg-secondary/80 backdrop-blur-md border-b border-border-subtle">
-      {/* Desktop breadcrumb */}
       <div className="hidden lg:flex items-center justify-between h-12 px-6">
         <div className="flex items-center gap-1.5 text-sm">
           {breadcrumbs.map((crumb, i) => (
             <span key={crumb.path} className="flex items-center gap-1.5">
               {i > 0 && <span className="text-text-muted">/</span>}
               {i < breadcrumbs.length - 1 ? (
-                <span
-                  onClick={() => navigate(crumb.path)}
-                  className="text-text-muted hover:text-text-secondary transition-colors cursor-pointer"
-                >
+                <span onClick={() => navigate(crumb.path)} className="text-text-muted hover:text-text-secondary transition-colors cursor-pointer">
                   {crumb.label}
                 </span>
               ) : (
@@ -72,23 +86,21 @@ export default function TopBar() {
           {saveNotice && (
             <span className="text-xs text-accent animate-pulse mr-2">已保存</span>
           )}
-          <button
-            onClick={handleExport}
-            className="btn-ghost flex items-center gap-1.5 px-3 py-1.5 text-xs"
-          >
+          <input ref={importInputRefDesktop} type="file" accept=".json" onChange={handleImport} className="hidden" />
+          <button onClick={() => importInputRefDesktop.current?.click()} className="btn-ghost flex items-center gap-1.5 px-3 py-1.5 text-xs">
+            <Upload size={14} />
+            <span>导入</span>
+          </button>
+          <button onClick={handleExport} className="btn-ghost flex items-center gap-1.5 px-3 py-1.5 text-xs">
             <Download size={14} />
             <span>导出</span>
           </button>
         </div>
       </div>
 
-      {/* Mobile - back button + title */}
       <div className="flex lg:hidden items-center h-12 px-2">
         {canGoBack ? (
-          <button
-            onClick={() => navigate(-1)}
-            className="p-2.5 rounded-lg text-text-secondary hover:text-text-primary hover:bg-bg-card transition-colors -webkit-tap-highlight-color-transparent"
-          >
+          <button onClick={() => navigate(-1)} className="p-2.5 rounded-lg text-text-secondary hover:text-text-primary hover:bg-bg-card transition-colors -webkit-tap-highlight-color-transparent">
             <ChevronLeft size={22} />
           </button>
         ) : (
@@ -97,7 +109,15 @@ export default function TopBar() {
         <h1 className="flex-1 text-center text-sm font-medium text-text-primary truncate px-2">
           {currentLabel}
         </h1>
-        <div className="w-10" />
+        <div className="flex items-center gap-1">
+          <input ref={importInputRefMobile} type="file" accept=".json" onChange={handleImport} className="hidden" />
+          <button onClick={() => importInputRefMobile.current?.click()} className="p-2.5 rounded-lg text-text-secondary hover:text-text-primary hover:bg-bg-card transition-colors">
+            <Upload size={18} />
+          </button>
+          <button onClick={handleExport} className="p-2.5 rounded-lg text-text-secondary hover:text-text-primary hover:bg-bg-card transition-colors">
+            <Download size={18} />
+          </button>
+        </div>
       </div>
     </header>
   );

@@ -20,10 +20,8 @@ import Card from '@/components/common/Card';
 
 import Badge from '@/components/common/Badge';
 import EmptyState from '@/components/common/EmptyState';
-
-const generateId = () =>
-  Math.random().toString(36).substring(2, 15) +
-  Math.random().toString(36).substring(2, 15);
+import { generateId } from '@/utils/id';
+import { compressImage } from '@/utils/image';
 
 type DesignTab = 'style' | 'color' | 'space' | 'reference';
 
@@ -33,39 +31,6 @@ const tabs: { key: DesignTab; label: string; icon: React.ReactNode }[] = [
   { key: 'space', label: '空间设计', icon: <LayoutGrid className="w-4 h-4" /> },
   { key: 'reference', label: '参考图集', icon: <Images className="w-4 h-4" /> },
 ];
-
-// ─── Image Upload Helper ────────────────────────────────────────────────────────
-const MAX_FILE_SIZE = 2 * 1024 * 1024;
-
-const compressImage = (base64Data: string): Promise<string> => {
-  return new Promise((resolve) => {
-    const img = new Image();
-    img.onload = () => {
-      const canvas = document.createElement('canvas');
-      let { width, height } = img;
-      const MAX_DIMENSION = 1920;
-      if (width > MAX_DIMENSION || height > MAX_DIMENSION) {
-        const ratio = Math.min(MAX_DIMENSION / width, MAX_DIMENSION / height);
-        width = Math.round(width * ratio);
-        height = Math.round(height * ratio);
-      }
-      canvas.width = width;
-      canvas.height = height;
-      const ctx = canvas.getContext('2d');
-      if (!ctx) { resolve(base64Data); return; }
-      ctx.drawImage(img, 0, 0, width, height);
-      let quality = 0.8;
-      let result = canvas.toDataURL('image/jpeg', quality);
-      while (result.length > MAX_FILE_SIZE && quality > 0.1) {
-        quality -= 0.1;
-        result = canvas.toDataURL('image/jpeg', quality);
-      }
-      resolve(result);
-    };
-    img.onerror = () => resolve(base64Data);
-    img.src = base64Data;
-  });
-};
 
 // ─── Style Tab ──────────────────────────────────────────────────────────────────
 const StyleTab: React.FC = () => {
@@ -143,7 +108,7 @@ const StyleTab: React.FC = () => {
             </div>
             <button
               onClick={() => fileInputRef.current?.click()}
-              className="absolute top-4 right-4 p-2.5 rounded-xl bg-black/40 backdrop-blur-sm text-white/80 hover:text-white hover:bg-black/60 transition-all opacity-0 group-hover:opacity-100"
+              className="absolute top-4 right-4 p-2.5 rounded-xl bg-black/40 backdrop-blur-sm text-white/80 hover:text-white hover:bg-black/60 transition-all md:opacity-0 md:group-hover:opacity-100"
             >
               <Camera className="w-5 h-5" />
             </button>
@@ -358,13 +323,13 @@ const ColorTab: React.FC = () => {
           {colors.map((color, index) => (
             <div
               key={index}
-              className="relative group/bar flex items-center justify-center transition-all duration-300 hover:flex-grow"
+              className="relative group/bar flex items-center justify-center transition-all duration-300"
               style={{
                 backgroundColor: color.hex,
                 flexBasis: `${color.proportion}%`,
               }}
             >
-              <span className="text-xs font-medium text-white/80 drop-shadow-md opacity-0 group-hover/bar:opacity-100 transition-opacity">
+              <span className="text-xs font-medium text-white/80 drop-shadow-md opacity-0 group-hover/bar:opacity-100 transition-opacity whitespace-nowrap">
                 {color.name} {color.proportion}%
               </span>
             </div>
@@ -492,7 +457,7 @@ const SpaceTab: React.FC = () => {
             </div>
             <button
               onClick={() => fileInputRef.current?.click()}
-              className="absolute top-4 right-4 p-2.5 rounded-xl bg-black/40 backdrop-blur-sm text-white/80 hover:text-white hover:bg-black/60 transition-all opacity-0 group-hover:opacity-100"
+              className="absolute top-4 right-4 p-2.5 rounded-xl bg-black/40 backdrop-blur-sm text-white/80 hover:text-white hover:bg-black/60 transition-all md:opacity-0 md:group-hover:opacity-100"
             >
               <Camera className="w-5 h-5" />
             </button>

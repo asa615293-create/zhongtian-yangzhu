@@ -4,6 +4,9 @@ import { useAppStore } from '@/store/useAppStore';
 import type { FurnishingItem, ReferenceImage } from '@/types';
 import FormField from '@/components/common/FormField';
 import { useComposingInput } from '@/hooks/useComposingInput';
+import { compressImage } from '@/utils/image';
+import { generateId } from '@/utils/id';
+import { isCabinetCategory, statusLabels, priorityLabels, boardTypeOptions, boardTypePriceMap } from '@/constants/furnishing';
 
 interface ItemDetailProps {
   item: FurnishingItem;
@@ -11,24 +14,6 @@ interface ItemDetailProps {
 }
 
 const categories = ['沙发', '床', '餐桌', '椅子', '茶几', '电视柜', '书桌', '衣柜', '柜体', '窗帘', '灯具', '地毯', '挂画', '绿植', '家电', '其他'];
-
-const boardTypeOptions = [
-  'E0级颗粒板 (700-1100元/㎡)',
-  'ENF级颗粒板 (1200-1600元/㎡)',
-  'E0级多层实木板 (1400-1800元/㎡)',
-  'ENF级多层实木板 (1600-2000元/㎡)',
-  '实木贴皮板 (2000-3000元/㎡)',
-  '纯实木 (3000-4000元/㎡)',
-];
-
-const boardTypePriceMap: Record<string, [number, number]> = {
-  'E0级颗粒板 (700-1100元/㎡)': [700, 1100],
-  'ENF级颗粒板 (1200-1600元/㎡)': [1200, 1600],
-  'E0级多层实木板 (1400-1800元/㎡)': [1400, 1800],
-  'ENF级多层实木板 (1600-2000元/㎡)': [1600, 2000],
-  '实木贴皮板 (2000-3000元/㎡)': [2000, 3000],
-  '纯实木 (3000-4000元/㎡)': [3000, 4000],
-};
 
 const priorityOptions: { value: FurnishingItem['priority']; label: string }[] = [
   { value: 'must', label: '必买' },
@@ -42,46 +27,6 @@ const statusOptions: { value: FurnishingItem['status']; label: string }[] = [
   { value: 'purchased', label: '已购' },
   { value: 'installed', label: '已安装' },
 ];
-
-const generateId = () =>
-  Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
-
-const MAX_FILE_SIZE = 2 * 1024 * 1024;
-
-const compressImage = (base64Data: string): Promise<string> => {
-  return new Promise((resolve) => {
-    const img = new Image();
-    img.onload = () => {
-      const canvas = document.createElement('canvas');
-      let { width, height } = img;
-      const MAX_DIMENSION = 1920;
-      if (width > MAX_DIMENSION || height > MAX_DIMENSION) {
-        const ratio = Math.min(MAX_DIMENSION / width, MAX_DIMENSION / height);
-        width = Math.round(width * ratio);
-        height = Math.round(height * ratio);
-      }
-      canvas.width = width;
-      canvas.height = height;
-      const ctx = canvas.getContext('2d');
-      if (!ctx) { resolve(base64Data); return; }
-      ctx.drawImage(img, 0, 0, width, height);
-      let quality = 0.8;
-      let result = canvas.toDataURL('image/jpeg', quality);
-      while (result.length > MAX_FILE_SIZE && quality > 0.1) {
-        quality -= 0.1;
-        result = canvas.toDataURL('image/jpeg', quality);
-      }
-      resolve(result);
-    };
-    img.onerror = () => resolve(base64Data);
-    img.src = base64Data;
-  });
-};
-
-// 判断品类是否为柜体类（适用全屋定制）
-const isCabinetCategory = (category: string) => {
-  return ['柜体', '衣柜', '电视柜', '鞋柜', '书柜', '餐边柜', '阳台柜', '储物柜'].includes(category);
-};
 
 const ItemDetail: React.FC<ItemDetailProps> = ({ item, onClose }) => {
   const { onCompositionStart, onCompositionEnd, isComposing } = useComposingInput();
@@ -541,7 +486,7 @@ const ItemDetail: React.FC<ItemDetailProps> = ({ item, onClose }) => {
                     />
                     <button
                       onClick={() => handleRemoveImage(img.id)}
-                      className="absolute top-1 right-1 p-1.5 rounded-full bg-black/50 text-white opacity-0 group-hover:opacity-100 transition-opacity"
+                      className="absolute top-1 right-1 p-1.5 rounded-full bg-black/50 text-white md:opacity-0 md:group-hover:opacity-100 transition-opacity"
                     >
                       <X className="w-3.5 h-3.5" />
                     </button>
