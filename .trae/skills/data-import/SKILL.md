@@ -5,189 +5,194 @@ description: "Safely imports and merges data into the renovation management syst
 
 # Data Import Skill
 
-Safely imports and merges data into the 中天央著 renovation management system. This skill ensures data integrity through a strict backup-export-merge-validate-import workflow.
+Safely imports and merges data into the 中天央著 renovation management system.
 
-## Mandatory Workflow
+## Critical: Data Structure Reference
 
-When this skill is invoked, you MUST follow these steps IN ORDER. Do NOT skip any step.
-
-### Step 1: Backup Current Server Data
-
-**ALWAYS backup before any data operation.** Run:
-
-```bash
-node scripts/backup.js
-```
-
-Verify the backup file was created in `backups/` directory. Record the filename.
-
-### Step 2: Export Current Data
-
-Export current server data to a local JSON file as a safety net:
-
-```bash
-curl -s https://zhongtian-yangzhu-production.up.railway.app/api/data > backups/pre-import-export.json
-```
-
-### Step 3: Prepare Import Data
-
-Based on the user's request, prepare the data to import. This could be:
-- Product specifications from web research
-- Data from MEMORY.md that hasn't been synced to the server
-- User-provided information
-
-**IMPORTANT**: The import data must be a valid JSON object matching the AppData structure:
+### AppData (顶层结构)
 ```json
 {
-  "property": { ... },
-  "deliverySpecs": { "roomId": [ { "id", "roomId", "category", "fieldKey", "fieldLabel", "value", "notes" } ] },
-  "furnishingItems": [ { "id", "roomId", "name", "category", ... } ],
-  "designSchemes": [ ... ],
+  "property": { "id", "name", "location", "area", "floor", "totalPrice", "deposit", "depositDate", "deliveryDate", "deliveryStandard", "privateElevator", "panoramicWindow", "unitType" },
+  "rooms": [ { "id", "name", "type", "sortOrder", "icon" } ],
+  "deliverySpecs": { "<roomId>": [ DeliverySpec ] },
+  "photos": { "<roomId>": [ Photo ] },
+  "measurements": { "<roomId>": [ Measurement ] },
+  "furnishingItems": [ FurnishingItem ],
+  "designSchemes": [ DesignScheme ],
   "budgetTarget": number
 }
 ```
 
-#### deliverySpecs 数据格式规范（严格执行）
-
-每个 spec 条目**只允许**以下字段：
+### DeliverySpec (交付标准 — 最容易出错的类型)
 ```json
-{ "id", "roomId", "category", "fieldKey", "fieldLabel", "value", "notes" }
+{
+  "id": "string",
+  "roomId": "string",
+  "category": "string",
+  "fieldKey": "string",
+  "fieldLabel": "string",
+  "value": "string",
+  "notes": "string"
+}
 ```
 
-**禁止**使用 `brand`、`model`、`colorCode` 子字段。品牌和型号必须作为**独立的 spec 条目**存储：
+**只有这7个字段！没有 brand、model、colorCode 子字段！**
+
+品牌、型号、颜色等都是**独立的 DeliverySpec 条目**，通过不同的 `fieldKey` 区分：
 
 ```json
-// ✅ 正确格式
+// ✅ 正确：品牌和型号是独立条目
 { "id": "kitchen-kitchen_sink_brand", "roomId": "kitchen", "category": "水槽", "fieldKey": "kitchen_sink_brand", "fieldLabel": "品牌", "value": "欧派", "notes": "" },
 { "id": "kitchen-kitchen_sink_model", "roomId": "kitchen", "category": "水槽", "fieldKey": "kitchen_sink_model", "fieldLabel": "型号", "value": "PS930C", "notes": "" }
 
-// ❌ 错误格式（brand/model 作为子字段）
+// ❌ 错误：brand/model 作为子字段（DeliverySpec 类型不存在这些字段，会被忽略）
 { "id": "kitchen-kitchen_sink_brand", "roomId": "kitchen", "category": "水槽", "fieldKey": "kitchen_sink_brand", "fieldLabel": "品牌", "value": "欧派", "brand": "欧派", "model": "PS930C", "notes": "" }
 ```
 
-`fieldKey` 必须与 `src/data/deliveryFields.ts` 中定义的 key 完全匹配。
-
-#### fieldKey 命名规则
-
-品牌字段：`{roomPrefix}_{item}_brand`（如 `kitchen_sink_brand`）
-型号字段：`{roomPrefix}_{item}_model`（如 `kitchen_sink_model`）
-颜色字段：`{roomPrefix}_{item}_color`（如 `kitchen_sink_color`）
-色号字段：`{roomPrefix}_{item}_color_code`（如 `kitchen_sink_color_code`）
-
-roomPrefix 对照表：
-- 玄关：`door_`、`lock_`、`entrance_`
-- 客餐厅：`living_`
-- 厨房：`kitchen_`
-- 主卧：`master_`
-- 次卧：`second_`
-- 书房：`study_`
-- 主卫：`bath1_`
-- 次卫：`bath2_`
-- 公卫：`bath3_`
-- 阳台：`balcony_`
-- 三大件：`hvac_`、`floor_heating_`、`intercom_` 等
-
-### Step 4: Validate Import Data
-
-Before importing, verify:
-1. All `id` fields are unique and follow the naming convention
-2. All `roomId` values match existing rooms: entrance, living, kitchen, masterBedroom, secondBedroom, study, bathroom1, bathroom2, bathroom3, balcony
-3. All `category` values match valid categories
-4. All `status` values are one of: pending, selected, purchased, installed
-5. All `priority` values are one of: must, recommended, optional
-6. Cabinet items should have `pricingMode: 'custom'` with `cabinetWidth`, `cabinetHeight`, `boardType`, `unitPrice`
-7. For deliverySpecs, `fieldKey` must match keys defined in `src/data/deliveryFields.ts`
-8. **deliverySpecs 条目不得包含 `brand`、`model`、`colorCode` 字段**
-
-### Step 5: Merge and Import
-
-Use curl to PUT data to production server (replaces entire data.json):
-
-```bash
-curl -X PUT https://zhongtian-yangzhu-production.up.railway.app/api/data \
-  -H "Content-Type: application/json" \
-  -d @prepared-data.json
+### FurnishingItem (软装物品)
+```json
+{
+  "id": "string",
+  "roomId": "string",
+  "name": "string",
+  "category": "string",
+  "sizeRequirement": "string",
+  "materialRequirement": "string",
+  "colorRequirement": "string",
+  "styleRequirement": "string",
+  "brandPreference": "string",
+  "budgetMin": "number | null",
+  "budgetMax": "number | null",
+  "actualPrice": "number | null",
+  "priority": "'must' | 'recommended' | 'optional'",
+  "status": "'pending' | 'selected' | 'purchased' | 'installed'",
+  "matchingNotes": "string",
+  "notes": "string",
+  "referenceImages": [ { "id", "itemId", "base64Data", "notes" } ],
+  "pricingMode": "'standard' | 'custom' (optional, 柜体专用)",
+  "cabinetWidth": "number | null (optional, 柜体专用)",
+  "cabinetHeight": "number | null (optional, 柜体专用)",
+  "boardType": "string (optional, 柜体专用)",
+  "unitPrice": "number | null (optional, 柜体专用)"
+}
 ```
 
-**注意**：PUT 会替换整个 data.json。如果只需要更新部分数据，必须先下载当前数据，在内存中合并后再 PUT。
+### roomId 对照表
+| roomId | 中文名 |
+|--------|--------|
+| entrance | 玄关 |
+| living | 客餐厅 |
+| kitchen | 厨房 |
+| masterBedroom | 主卧 |
+| secondBedroom | 次卧 |
+| study | 书房 |
+| bathroom1 | 主卫 |
+| bathroom2 | 次卫 |
+| bathroom3 | 公卫 |
+| balcony | 阳台 |
 
-合并逻辑：
-- **deliverySpecs**: 按 roomId 合并，同一 roomId 的 specs 整体替换
-- **furnishingItems**: 按 id 合并，同 id 覆盖，新 id 追加
-- **property/budgetTarget**: 直接覆盖
+### fieldKey 命名规则
+fieldKey 必须与 `src/data/deliveryFields.ts` 中定义的 key 完全匹配。
+- 品牌：`{prefix}_{item}_brand`（如 `kitchen_sink_brand`）
+- 型号：`{prefix}_{item}_model`（如 `kitchen_sink_model`）
+- 颜色：`{prefix}_{item}_color`（如 `kitchen_sink_color`）
+- 色号：`{prefix}_{item}_color_code`（如 `kitchen_sink_color_code`）
 
-### Step 6: Verify Import
+prefix 对照：玄关 `door_`/`lock_`/`entrance_`、客餐厅 `living_`、厨房 `kitchen_`、主卧 `master_`、次卧 `second_`、书房 `study_`、主卫 `bath1_`、次卫 `bath2_`、公卫 `bath3_`、阳台 `balcony_`、三大件 `hvac_`/`floor_heating_`/`intercom_` 等
 
-After importing, download and verify:
-```bash
-curl -s https://zhongtian-yangzhu-production.up.railway.app/api/data > backups/post-import-verify.json
-node -e "const d=JSON.parse(require('fs').readFileSync('backups/post-import-verify.json','utf-8')); console.log('items:', d.furnishingItems?.length); console.log('spec rooms:', Object.keys(d.deliverySpecs||{}).length)"
+## Mandatory Workflow (6 Steps)
+
+### Step 1: Backup
+```powershell
+node scripts/backup.js
+```
+Verify "备份完成!" in output. If fails, continue anyway (non-blocking).
+
+### Step 2: Fetch Current Server Data
+```powershell
+curl.exe -s https://zhongtian-yangzhu-production.up.railway.app/api/data
+```
+Save to a local variable. This is the source of truth. **Do NOT proceed if this fails.**
+
+### Step 3: Prepare Import Data
+
+Based on user's request, prepare data to merge. Key rules:
+- deliverySpecs: 每个 spec 只有 7 个字段 (id, roomId, category, fieldKey, fieldLabel, value, notes)
+- furnishingItems: 完整的 FurnishingItem 结构
+- fieldKey 必须匹配 deliveryFields.ts 中的定义
+
+### Step 4: Smart Merge
+
+#### deliverySpecs 合并 (按 roomId + fieldKey):
+```
+For each new spec:
+  1. Find existing spec by fieldKey in the same room
+  2. If found:
+     - If existing value is EMPTY → fill with new value
+     - If existing value has content → DO NOT OVERWRITE
+  3. If NOT found:
+     - Add as new entry
 ```
 
-Check that:
-- Item count matches expectations
+#### furnishingItems 合并 (按 id):
+```
+For each new/update item:
+  1. Find existing item by id
+  2. If found:
+     - Only fill EMPTY fields (brandPreference, materialRequirement, etc.)
+     - NEVER overwrite: actualPrice, status, notes (if user-filled), matchingNotes
+  3. If NOT found:
+     - Add as new item
+```
+
+#### Other data:
+- property: Only fill empty fields, never overwrite
+- rooms: Never modify
+- photos/measurements: Never modify
+- designSchemes: Only add new, never modify existing
+- budgetTarget: Only update if user explicitly requests
+
+### Step 5: Upload Merged Data
+```powershell
+curl.exe -X PUT https://zhongtian-yangzhu-production.up.railway.app/api/data -H "Content-Type: application/json" -d "@prepared-data.json"
+```
+
+**注意**：PUT 会替换整个 data.json。必须先下载当前数据，合并后再 PUT。
+
+### Step 6: Verify
+```powershell
+curl.exe -s https://zhongtian-yangzhu-production.up.railway.app/api/data
+```
+Check:
+- furnishingItems count >= previous count
+- deliverySpecs rooms count unchanged
 - No existing data was lost
-- New data appears correctly
-- No `brand`/`model`/`colorCode` sub-fields exist in any spec
+- No brand/model/colorCode sub-fields exist in any spec (these would be ignored by the system)
 
-### Step 7: Rollback if Needed
-
-If the import caused problems, restore from backup:
-```bash
-curl -X PUT https://zhongtian-yangzhu-production.up.railway.app/api/data \
-  -H "Content-Type: application/json" \
-  -d @backups/<backup-file>.json
+If verification fails, restore from backup:
+```powershell
+curl.exe -X PUT https://zhongtian-yangzhu-production.up.railway.app/api/data -H "Content-Type: application/json" -d "@backups/<backup-file>.json"
 ```
 
-## Common Import Scenarios
+## Strict Rules
 
-### Scenario 1: Add/Update Furnishing Items
-
-When user wants to add new items or update existing ones with brand/model/price info:
-
-1. Research product details (brand, model, specs, price) via web search
-2. Prepare items with complete data including:
-   - `brandPreference`: confirmed brand
-   - `materialRequirement`: material details
-   - `sizeRequirement`: dimensions
-   - `budgetMin`/`budgetMax`: price range from research
-   - For cabinets: `pricingMode: 'custom'`, `cabinetWidth`, `cabinetHeight`, `boardType`, `unitPrice`
-3. Follow the standard workflow
-
-### Scenario 2: Fill Delivery Specs from MEMORY.md
-
-When syncing confirmed brand info from MEMORY.md to deliverySpecs:
-
-1. Read MEMORY.md for confirmed brands/models
-2. For each brand, create a spec with `fieldKey` = `{prefix}_brand`, `value` = brand name
-3. For each model, create a **separate** spec with `fieldKey` = `{prefix}_model`, `value` = model number
-4. Import per-room, preserving existing specs
-
-### Scenario 3: Batch Update Item Status
-
-When user confirms purchases or installations:
-
-1. Prepare items with updated `status` and `actualPrice`
-2. Import - the merge logic will update existing items by ID
-
-## Data Safety Rules
-
-1. **NEVER skip backup** - even for small changes
-2. **NEVER replace all data** - always use merge, not replace
-3. **ALWAYS verify after import** - check item counts and key values
-4. **ALWAYS keep export file** - as a secondary safety net
-5. **NEVER modify data.json directly** - always go through the API
-6. **If import fails, rollback immediately** from the backup created in Step 1
-7. **NEVER use brand/model/colorCode sub-fields** in deliverySpecs
+1. **NEVER skip backup** — even for small changes
+2. **NEVER use brand/model/colorCode sub-fields** in deliverySpecs — they don't exist in the type
+3. **NEVER replace all data** — always merge with existing
+4. **NEVER overwrite user-entered data** — only fill empty fields
+5. **NEVER modify photos/measurements** unless explicitly asked
+6. **NEVER delete existing furnishingItems** — only add or fill empty fields
+7. **fieldKey must match deliveryFields.ts** — never invent new keys
+8. **Use `curl.exe` not `curl`** — PowerShell has alias conflict
+9. **Use `;` not `&&`** in PowerShell commands
 
 ## Project Context
 
-- **Working directory**: c:\Users\Administrator\Desktop\装\中天央著装修方案
-- **Server**: Express on port 3001 (local) or Railway (production)
+- **Working directory**: `c:\Users\Administrator\Desktop\装\中天央著装修方案`
 - **Production URL**: https://zhongtian-yangzhu-production.up.railway.app
-- **Data file**: server/data.json
-- **Backup script**: scripts/backup.js
-- **Store**: src/store/useAppStore.ts (Zustand)
 - **Types**: src/types/index.ts
 - **Field definitions**: src/data/deliveryFields.ts
+- **Store**: src/store/useAppStore.ts
+- **Server**: server/index.js (Express, port 3001)
+- **Backup script**: scripts/backup.js
 - **MEMORY.md**: Contains confirmed brand choices and project history

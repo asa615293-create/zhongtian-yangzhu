@@ -7,36 +7,67 @@ description: "Commits all changes, pushes to git remote, and triggers deployment
 
 This skill automates the workflow of committing code, pushing to the git remote repository, and triggering server deployment.
 
-## Workflow
+## Critical Context
 
-1. **Backup Data**: Before any git operation, run `node scripts/backup.js` to backup server data to `backups/` directory. This ensures user data is preserved even if the server resets during deployment.
-2. **Check Status**: Run `git status` and `git diff` to see all modified and untracked files.
-3. **Stage Files**: Stage all relevant source files with `git add`. Do NOT stage:
-   - `.trae/` directory
-   - `tsconfig.tsbuildinfo`
-   - `backups/` directory (local only, not for repo)
-   - Any `.md` files that are reference documents (调研报告、指令等)
-   - Any files containing secrets or credentials
-4. **Commit**: Create a commit with a concise message describing the changes. Use the format:
-   - `fix:` for bug fixes
-   - `feat:` for new features
-   - `chore:` for maintenance tasks
-5. **Push**: Run `git push` to push to the remote repository. The server will automatically deploy from the git push.
-   - **Network retry**: If push fails with SSL/connection error, retry up to 5 times. Company network may be unstable. Do NOT ask user to manually push until all retries exhausted.
-   - **Do NOT change remote URL** to SSH (SSH is not configured in sandbox).
-   - **Do NOT modify system-level git config** (only project-level with `--local`).
-6. **Verify Data**: After push, check if server data was lost during deployment by calling `GET /api/data`. If data is empty, restore from the latest backup in `backups/` directory by reading the file and `PUT /api/data`.
+- **Working directory**: `c:\Users\Administrator\Desktop\装\中天央著装修方案`
+- **Shell**: PowerShell 5 — NEVER use `&&` (use `;` instead), NEVER use heredoc `<<EOF`
+- **Git accounts**: This project uses PRIVATE account `asa615293-create / asa615293@gmail.com` (local config only). ALL other projects use global account `wangjingbo / jingbo.wang@dhc.com.cn`. NEVER touch global git config or Windows Credential Manager!
+- **Network**: Sandbox network is unstable for GitHub HTTPS. Push may timeout. Retry up to 3 times before escalating.
 
-## Important Notes
+## Workflow (Follow Exactly)
 
-- This project is a Vite + React app deployed via GitHub. Pushing to `main` branch triggers automatic deployment.
-- The working directory is: `c:\Users\Administrator\Desktop\装\中天央著装修方案`
-- PowerShell is the shell environment — do NOT use bash-specific syntax like `&&` or heredoc `<<EOF`.
-- Use `;` to chain commands in PowerShell instead of `&&`.
-- For commit messages with special characters, use simple quoted strings: `git commit -m "message"`
-- Always verify the push succeeded by checking the command output.
-- If there are untracked files that are reference documents (调研报告, etc.), skip them — they should not be in the repo.
-- **NEVER overwrite server data** when deploying. Code changes and user data are separate. Only restore data if server lost it during deployment.
-- **Backup before every deployment** — this is mandatory, not optional.
-- **NEVER modify system-level configuration** — only use `git config --local` for project-level changes. This is a work computer, system config must not be touched.
-- **Self-resolve before asking user** — retry failed operations (especially git push) multiple times before asking user to manually intervene. Only escalate to user after exhausting all reasonable attempts.
+### Step 1: Backup
+```powershell
+node scripts/backup.js
+```
+If backup fails, continue anyway (non-blocking).
+
+### Step 2: Check Status
+```powershell
+git status
+```
+Only read the output — do NOT run `git diff` (it may produce huge output and waste context).
+
+### Step 3: Stage Files
+Stage ONLY source code files. NEVER stage:
+- `.trae/` directory
+- `tsconfig.tsbuildinfo`
+- `backups/` directory
+- Reference `.md` files (调研报告、指令、嘉伟装修知识等)
+- Any files with secrets/credentials
+
+Use specific `git add` for each file, NOT `git add .` or `git add -A`.
+
+### Step 4: Commit
+```powershell
+git commit -m "type: concise description"
+```
+Types: `fix:` / `feat:` / `chore:` / `style:` / `refactor:`
+
+### Step 5: Push (with retry)
+```powershell
+git push
+```
+If fails with timeout/SSL error:
+1. Wait 3 seconds, retry (max 3 times)
+2. If still fails after 3 retries → tell user to push manually in their own terminal:
+   ```
+   请在你自己的终端（非 Trae 终端）执行：
+   cd "C:\Users\Administrator\Desktop\装\中天央著装修方案"
+   git push
+   ```
+
+### Step 6: Verify
+After successful push, Railway auto-deploys in ~2-3 minutes.
+
+## Strict Rules
+
+1. **NEVER modify global git config** — only `git config --local`
+2. **NEVER delete Windows Credential Manager entries** — those belong to the global account used by ALL other projects
+3. **NEVER change remote URL** to SSH or embed credentials
+4. **NEVER run `git diff`** — use `git status` only to check what changed
+5. **NEVER stage `.trae/` directory** — it contains IDE config, skills, and documents
+6. **NEVER stage reference documents** — 调研报告、指令、嘉伟装修知识 etc.
+7. **Use `;` not `&&`** in PowerShell commands
+8. **Retry push 3 times** before asking user to manually intervene
+9. **Keep commit messages in English** to avoid encoding issues

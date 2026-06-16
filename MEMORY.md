@@ -278,6 +278,20 @@ src/
   - **已更新 MEMORY.md**：添加"严格禁止操作"警告，防止后续对话再犯同样错误
   - **网络问题**：终端沙箱 push GitHub 持续超时（端口443能通但HTTPS连接超时），仍需用户在非沙箱终端手动 push
 
+### 2026-06-16 对话 8（数据规范化 + Skill 整理）
+
+- **用户诉求**：解决数据上传后品牌型号丢失问题，整理 Skill，确保系统规范清晰
+- **问题根因**：
+  - `safe-data-import` Skill 数据结构错误 — 把 brand/model/colorCode 当作 deliverySpec 子字段，但实际类型只有7个字段
+  - 存在两个功能重叠的 Skill（data-import + safe-data-import），新对话 AI 不知道用哪个
+  - 服务器数据为空（被其他对话错误操作清空）
+- **已完成**：
+  - **删除 safe-data-import Skill**：数据结构描述错误，是品牌型号丢失的根源
+  - **重写 data-import Skill**：开头即列出完整数据结构定义，明确"DeliverySpec 只有7个字段，没有 brand/model/colorCode 子字段"，附带正确/错误示例
+  - **恢复服务器数据**：从最新备份恢复，修复26条空的 category/fieldLabel，移除6条无意义的 `__notes_` 空条目
+  - **MEMORY.md 新增"数据结构规范"章节**：新对话必读，包含 DeliverySpec/FurnishingItem/roomId/fieldKey 完整参考
+  - **优化 git-push-deploy Skill**：添加 Critical Context、Strict Rules，防止再犯全局配置/凭证错误
+
 ## 已部署信息
 
 | 项目               | 值                                                              |
@@ -327,6 +341,34 @@ src/
 - [ ] 补全服务器缺失数据（品牌型号规格等）
 - [X] deliverySpecs 数据格式迁移（brand/model/colorCode 子字段 → 独立 spec 条目）
 
+## 数据结构规范（新对话必读）
+
+### DeliverySpec — 交付标准（最容易出错）
+**只有7个字段，没有 brand/model/colorCode 子字段！**
+```json
+{ "id": "string", "roomId": "string", "category": "string", "fieldKey": "string", "fieldLabel": "string", "value": "string", "notes": "string" }
+```
+品牌/型号/颜色都是**独立的 DeliverySpec 条目**，通过不同 fieldKey 区分：
+- `{prefix}_{item}_brand` → 品牌（如 `kitchen_sink_brand`）
+- `{prefix}_{item}_model` → 型号（如 `kitchen_sink_model`）
+- `{prefix}_{item}_color` → 颜色（如 `kitchen_sink_color`）
+- `{prefix}_{item}_color_code` → 色号（如 `kitchen_sink_color_code`）
+
+### FurnishingItem — 软装物品
+完整字段：`id, roomId, name, category, sizeRequirement, materialRequirement, colorRequirement, styleRequirement, brandPreference, budgetMin, budgetMax, actualPrice, priority, status, matchingNotes, notes, referenceImages`
+柜体专用可选字段：`pricingMode, cabinetWidth, cabinetHeight, boardType, unitPrice`
+
+### roomId 对照表
+entrance=玄关, living=客餐厅, kitchen=厨房, masterBedroom=主卧, secondBedroom=次卧, study=书房, bathroom1=主卫, bathroom2=次卫, bathroom3=公卫, balcony=阳台
+
+### fieldKey 前缀
+玄关: `door_`/`lock_`/`entrance_`, 客餐厅: `living_`, 厨房: `kitchen_`, 主卧: `master_`, 次卧: `second_`, 书房: `study_`, 主卫: `bath1_`, 次卫: `bath2_`, 公卫: `bath3_`, 阳台: `balcony_`, 三大件: `hvac_`/`floor_heating_`/`intercom_` 等
+
+### AppData 顶层结构
+```json
+{ "property", "rooms", "deliverySpecs": {"<roomId>": [DeliverySpec]}, "photos": {"<roomId>": [Photo]}, "measurements": {"<roomId>": [Measurement]}, "furnishingItems": [FurnishingItem], "designSchemes": [DesignScheme], "budgetTarget": number }
+```
+
 ## 工作原则（AI 必须遵守）
 
 ### 1. 主动维护，无需提醒
@@ -347,9 +389,9 @@ src/
 ### 3. 数据格式规范
 
 - deliverySpecs 只允许 7 个字段：`id, roomId, category, fieldKey, fieldLabel, value, notes`
-- 禁止 `brand`、`model`、`colorCode` 子字段
-- 品牌和型号必须作为独立的 spec 条目存储
+- **禁止 `brand`、`model`、`colorCode` 子字段** — 这是反复出错的根源！品牌型号必须是独立 spec 条目
 - 所有 `fieldKey` 必须与 `src/data/deliveryFields.ts` 中的定义完全匹配
+- category 和 fieldLabel 不能为空字符串，必须从 deliveryFields.ts 中获取对应的分类名和标签
 
 ### 4. 修改前检查清单
 
