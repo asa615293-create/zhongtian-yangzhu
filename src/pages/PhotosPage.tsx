@@ -98,22 +98,6 @@ const PhotosPage: React.FC = () => {
           onUpdateNotes={handleUpdateNotes}
           category={currentRoom?.name}
         />
-
-        {/* Show taken dates for uploaded photos */}
-        {roomPhotos.length > 0 && (
-          <div className="mt-4 pt-3 border-t border-border-subtle">
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
-              {roomPhotos.map((photo) => (
-                photo.takenDate && (
-                  <div key={photo.id} className="text-xs text-text-muted flex items-center gap-1">
-                    <Calendar className="w-3 h-3" />
-                    {photo.takenDate}
-                  </div>
-                )
-              ))}
-            </div>
-          </div>
-        )}
       </Card>
     </div>
   );

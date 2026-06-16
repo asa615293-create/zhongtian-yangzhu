@@ -716,14 +716,14 @@ export const useAppStore = create<AppStore>()((set, get) => ({
         const data = await res.json();
         if (data && Object.keys(data).length > 0) {
           set({
-            property: data.property || defaultProperty,
-            rooms: data.rooms || defaultRooms,
-            deliverySpecs: data.deliverySpecs || {},
-            photos: data.photos || {},
-            measurements: data.measurements || {},
-            furnishingItems: data.furnishingItems?.length ? data.furnishingItems : defaultFurnishingItems,
-            designSchemes: data.designSchemes || [],
-            budgetTarget: data.budgetTarget || 150000,
+            property: data.property ?? defaultProperty,
+            rooms: data.rooms ?? defaultRooms,
+            deliverySpecs: data.deliverySpecs ?? {},
+            photos: data.photos ?? {},
+            measurements: data.measurements ?? {},
+            furnishingItems: data.furnishingItems ?? defaultFurnishingItems,
+            designSchemes: data.designSchemes ?? [],
+            budgetTarget: data.budgetTarget ?? 150000,
             loaded: true,
           });
           return;
@@ -1008,3 +1008,31 @@ export const useAppStore = create<AppStore>()((set, get) => ({
     }
   },
 }));
+
+// 页面关闭前尝试保存未持久化的数据
+if (typeof window !== 'undefined') {
+  window.addEventListener('beforeunload', () => {
+    if (saveTimer) {
+      clearTimeout(saveTimer);
+      const state = useAppStore.getState();
+      const data = JSON.stringify({
+        property: state.property,
+        rooms: state.rooms,
+        deliverySpecs: state.deliverySpecs,
+        photos: state.photos,
+        measurements: state.measurements,
+        furnishingItems: state.furnishingItems,
+        designSchemes: state.designSchemes,
+        budgetTarget: state.budgetTarget,
+      });
+      try {
+        const xhr = new XMLHttpRequest();
+        xhr.open('PUT', `${API_BASE}/api/data`, false); // synchronous
+        xhr.setRequestHeader('Content-Type', 'application/json');
+        xhr.send(data);
+      } catch (e) {
+        // Best effort - can't block page close
+      }
+    }
+  });
+}

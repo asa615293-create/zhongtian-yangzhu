@@ -127,8 +127,9 @@ export default function TopBar() {
         </h1>
         <div className="flex items-center gap-1">
           <input ref={importInputRefMobile} type="file" accept=".json" onChange={handleImport} className="hidden" />
-          <button onClick={() => importInputRefMobile.current?.click()} className="p-2.5 rounded-lg text-text-secondary hover:text-text-primary hover:bg-bg-card transition-colors">
-            <Upload size={18} />
+          <button onClick={() => importInputRefMobile.current?.click()} className="p-2.5 rounded-lg text-text-secondary hover:text-text-primary hover:bg-bg-card transition-colors flex items-center gap-1">
+            <Upload size={16} />
+            <span className="text-xs">导入</span>
           </button>
           <button onClick={handleExport} className="p-2.5 rounded-lg text-text-secondary hover:text-text-primary hover:bg-bg-card transition-colors">
             <Download size={18} />

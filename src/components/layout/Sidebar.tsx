@@ -1,6 +1,7 @@
 import { NavLink, useLocation } from 'react-router-dom';
 import { LayoutDashboard, Building2, ShoppingBag, Palette, Wallet, ChevronDown } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useAppStore } from '@/store/useAppStore';
 
 const archiveSubItems = [
   { label: '精装交付标准', path: '/archive/delivery' },
@@ -12,7 +13,11 @@ const archiveSubItems = [
 export default function Sidebar() {
   const location = useLocation();
   const isArchiveActive = location.pathname.startsWith('/archive');
+  const property = useAppStore((s) => s.property);
   const [archiveExpanded, setArchiveExpanded] = useState(isArchiveActive);
+  useEffect(() => {
+    if (isArchiveActive) setArchiveExpanded(true);
+  }, [isArchiveActive]);
 
   return (
     <aside className="hidden lg:flex lg:flex-col w-64 h-screen fixed left-0 top-0 bg-bg-secondary border-r border-border-subtle z-30">
@@ -99,7 +104,7 @@ export default function Sidebar() {
 
       {/* Property info */}
       <div className="px-4 py-4">
-        <p className="text-xs text-text-muted">中天·央著 | 142.31㎡ | 5楼</p>
+        <p className="text-xs text-text-muted">{property.name} | {property.area}㎡ | {property.floor}</p>
       </div>
     </aside>
   );

@@ -22,6 +22,7 @@ import Badge from '@/components/common/Badge';
 import EmptyState from '@/components/common/EmptyState';
 import { generateId } from '@/utils/id';
 import { compressImage } from '@/utils/image';
+import { statusLabels } from '@/constants/furnishing';
 
 type DesignTab = 'style' | 'color' | 'space' | 'reference';
 
@@ -519,10 +520,7 @@ const SpaceTab: React.FC = () => {
                   <span className="text-xs text-text-muted">{item.category}</span>
                 </div>
                 <Badge variant={item.status}>
-                  {item.status === 'pending' && '待选'}
-                  {item.status === 'selected' && '已选'}
-                  {item.status === 'purchased' && '已购'}
-                  {item.status === 'installed' && '已安装'}
+                  {statusLabels[item.status]}
                 </Badge>
               </div>
             ))}
@@ -640,7 +638,7 @@ const ReferenceTab: React.FC = () => {
               />
               <button
                 onClick={() => removeDesignScheme(scheme.id)}
-                className="absolute top-2 right-2 p-1.5 rounded-lg bg-black/50 text-white opacity-0 group-hover:opacity-100 transition-opacity"
+                className="absolute top-2 right-2 p-1.5 rounded-lg bg-black/50 text-white md:opacity-0 md:group-hover:opacity-100 transition-opacity"
               >
                 <X className="w-3.5 h-3.5" />
               </button>

@@ -607,7 +607,8 @@ const BudgetPage: React.FC = () => {
         </div>
 
         {sortedItems.length > 0 ? (
-          <div className="overflow-x-auto -mx-5">
+          <div className="relative -mx-5">
+            <div className="overflow-x-auto">
             <table className="w-full min-w-[540px]">
               <thead>
                 <tr className="border-b border-border-subtle">
@@ -675,6 +676,8 @@ const BudgetPage: React.FC = () => {
                 })}
               </tbody>
             </table>
+            </div>
+            <div className="md:hidden absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-bg-primary to-transparent pointer-events-none" />
           </div>
         ) : (
           <div className="py-12 text-center">

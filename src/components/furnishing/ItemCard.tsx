@@ -4,6 +4,7 @@ import type { FurnishingItem } from '@/types';
 import Card from '@/components/common/Card';
 import Badge from '@/components/common/Badge';
 import { statusLabels, priorityLabels } from '@/constants/furnishing';
+import { calcProjectedArea } from '@/utils/cabinet';
 
 interface ItemCardProps {
   item: FurnishingItem;
@@ -16,9 +17,7 @@ const ItemCard: React.FC<ItemCardProps> = ({ item, onClick }) => {
   const isCustomPricing = item.pricingMode === 'custom';
 
   // 全屋定制投影面积计算
-  const projectedArea = (item.cabinetWidth && item.cabinetHeight)
-    ? ((item.cabinetWidth / 1000) * (item.cabinetHeight / 1000))
-    : 0;
+  const projectedArea = calcProjectedArea(item.cabinetWidth, item.cabinetHeight);
 
   return (
     <Card hover onClick={onClick} className="fade-in">

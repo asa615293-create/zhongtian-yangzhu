@@ -6,14 +6,13 @@ import FormField from '@/components/common/FormField';
 import { useComposingInput } from '@/hooks/useComposingInput';
 import { compressImage } from '@/utils/image';
 import { generateId } from '@/utils/id';
-import { isCabinetCategory, statusLabels, priorityLabels, boardTypeOptions, boardTypePriceMap } from '@/constants/furnishing';
+import { calcProjectedArea, calcEstimatedPrice } from '@/utils/cabinet';
+import { isCabinetCategory, statusLabels, priorityLabels, boardTypeOptions, boardTypePriceMap, allCategories } from '@/constants/furnishing';
 
 interface ItemDetailProps {
   item: FurnishingItem;
   onClose: () => void;
 }
-
-const categories = ['沙发', '床', '餐桌', '椅子', '茶几', '电视柜', '书桌', '衣柜', '柜体', '窗帘', '灯具', '地毯', '挂画', '绿植', '家电', '其他'];
 
 const priorityOptions: { value: FurnishingItem['priority']; label: string }[] = [
   { value: 'must', label: '必买' },
@@ -87,12 +86,8 @@ const ItemDetail: React.FC<ItemDetailProps> = ({ item, onClose }) => {
   const isCustomPricing = pricingMode === 'custom';
 
   // 投影面积计算
-  const projectedArea = (item.cabinetWidth && item.cabinetHeight)
-    ? ((item.cabinetWidth / 1000) * (item.cabinetHeight / 1000))
-    : 0;
-  const estimatedPrice = projectedArea && item.unitPrice
-    ? Math.round(projectedArea * item.unitPrice)
-    : 0;
+  const projectedArea = calcProjectedArea(item.cabinetWidth, item.cabinetHeight);
+  const estimatedPrice = calcEstimatedPrice(projectedArea, item.unitPrice);
 
   // 板材选择时自动填充参考单价
   const handleBoardTypeChange = (boardType: string) => {
@@ -117,12 +112,9 @@ const ItemDetail: React.FC<ItemDetailProps> = ({ item, onClose }) => {
   // 全屋定制参数变化时自动更新预算
   const handleCustomPriceUpdate = (data: Partial<FurnishingItem>) => {
     const updated = { ...item, ...data };
-    const w = updated.cabinetWidth;
-    const h = updated.cabinetHeight;
-    const p = updated.unitPrice;
-    if (w && h && p) {
-      const area = (w / 1000) * (h / 1000);
-      const price = Math.round(area * p);
+    const area = calcProjectedArea(updated.cabinetWidth, updated.cabinetHeight);
+    const price = calcEstimatedPrice(area, updated.unitPrice);
+    if (price) {
       update({ ...data, budgetMin: price, budgetMax: price });
     } else {
       update(data);
@@ -177,7 +169,7 @@ const ItemDetail: React.FC<ItemDetailProps> = ({ item, onClose }) => {
               value={item.category}
               onChange={(v) => update({ category: v })}
               type="select"
-              options={categories}
+              options={allCategories}
             />
             <FormField
               label="所属空间"

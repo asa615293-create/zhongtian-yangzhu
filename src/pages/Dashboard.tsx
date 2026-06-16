@@ -48,12 +48,12 @@ const Dashboard: React.FC = () => {
   }).length;
 
   // 综合完成度
-  const archiveProgress = Math.round(
+  const archiveProgress = Math.min(100, Math.round(
     ((roomsWithDelivery / rooms.length) * 40 +
       (systemsCategoriesFilled >= 3 ? 20 : (systemsCategoriesFilled / 3) * 20) +
       (roomsWithPhotos / rooms.length) * 20 +
       (roomsWithMeasurements / rooms.length) * 20)
-  );
+  ));
 
   // 计算已支出
   const totalActual = furnishingItems.reduce((sum, item) => {

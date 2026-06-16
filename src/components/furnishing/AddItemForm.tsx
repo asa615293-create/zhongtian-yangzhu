@@ -4,7 +4,7 @@ import { useAppStore } from '@/store/useAppStore';
 import type { FurnishingItem } from '@/types';
 import { useComposingInput } from '@/hooks/useComposingInput';
 import { generateId } from '@/utils/id';
-import { cabinetCategories } from '@/constants/furnishing';
+import { cabinetCategories, allCategories } from '@/constants/furnishing';
 
 interface AddItemFormProps {
   roomId: string;
@@ -24,13 +24,6 @@ const roomCategoryMap: Record<string, string[]> = {
   bathroom3: ['浴巾架', '镜前灯', '其他'],
   balcony: ['晾衣架', '绿植', '休闲椅', '其他'],
 };
-
-// 所有品类合集（去重）
-const allCategories = [
-  '鞋柜', '沙发', '茶几', '电视柜', '餐桌', '餐椅', '床', '床垫', '床头柜',
-  '衣柜', '书桌', '书柜', '椅子', '窗帘', '灯具', '地毯', '挂画', '绿植',
-  '装饰摆件', '浴巾架', '镜前灯', '穿衣镜', '衣帽架', '地垫', '晾衣架', '休闲椅', '其他',
-];
 
 // 每个品类的placeholder
 const categoryPlaceholderMap: Record<string, string> = {
