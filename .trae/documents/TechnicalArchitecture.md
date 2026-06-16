@@ -624,20 +624,20 @@ function writeData(data) {
 
 | # | 问题 | 位置 | 影响 | 状态 |
 |---|------|------|------|------|
-| 1 | ItemDetail 品类列表不完整（16项 vs 27项） | ItemDetail.tsx L16 | 用户编辑物品详情时无法选择部分品类 | ❌ 未修复 |
-| 2 | loadFromServer falsy 判断导致数据丢失 | useAppStore.ts L724 | 空软装清单回退为默认、budgetTarget=0 被重置 | ❌ 未修复 |
-| 3 | Dashboard 进度计算可超 100% | Dashboard.tsx L53 | 三大件满分 46.7 分，总进度溢出 | ❌ 未修复 |
-| 4 | DesignPage ReferenceTab 删除按钮移动端不可见 | DesignPage.tsx L643 | 移动端无法删除参考图 | ❌ 未修复 |
-| 5 | Sidebar archiveExpanded 不随路由自动展开 | Sidebar.tsx L15 | 从其他页面导航到档案子页面时侧栏不展开 | ❌ 未修复 |
+| 1 | ItemDetail 品类列表不完整（16项 vs 27项） | constants/furnishing.ts | 品类列表已提取到常量统一管理 | ✅ 已修复 |
+| 2 | loadFromServer falsy 判断导致数据丢失 | useAppStore.ts | `||` 全部改为 `??`，空数组不再回退默认值 | ✅ 已修复 |
+| 3 | Dashboard 进度计算可超 100% | Dashboard.tsx | 添加 `Math.min(100, ...)` 上限 | ✅ 已修复 |
+| 4 | DesignPage ReferenceTab 删除按钮移动端不可见 | DesignPage.tsx | 改为 `md:opacity-0 md:group-hover:opacity-100` | ✅ 已修复 |
+| 5 | Sidebar archiveExpanded 不随路由自动展开 | Sidebar.tsx | 添加 useEffect 同步路由状态 | ✅ 已修复 |
 
 ### 7.2 逻辑/设计隐患
 
 | # | 问题 | 位置 | 风险 | 状态 |
 |---|------|------|------|------|
 | 6 | 手绘草图滥用 Measurement.notes 存 base64 | MeasurementsPage.tsx L77 | 数据模型混乱，影响统计和导出 | ❌ 未修复 |
-| 7 | 投影面积计算逻辑 3 处重复 | ItemDetail/ItemCard/BudgetPage | 修改一处漏改其他，逻辑不一致 | ❌ 未修复 |
+| 7 | 投影面积计算逻辑 3 处重复 | utils/cabinet.ts | 已提取 `calcProjectedArea`/`calcEstimatedPrice` 工具函数 | ✅ 已修复 |
 | 8 | importData 合并策略不一致 | useAppStore.ts L939 | deliverySpecs/photos 按房间全量替换可能丢数据 | ✅ 已修复（2.4 安全合并策略 + safe-upload.js） |
-| 9 | 自动保存无 beforeunload 保护 | useAppStore.ts L587 | 关闭页面前 1 秒内的修改可能丢失 | ❌ 未修复 |
+| 9 | 自动保存无 beforeunload 保护 | useAppStore.ts | 已添加 beforeunload 同步 XHR 保存 | ✅ 已修复 |
 | 10 | 服务端无并发保护和数据校验 | server/index.js L58 | 多设备同时修改互相覆盖；API 无认证 | ❌ 未修复 |
 | 11 | 图片数据膨胀隐患 | 全局 | 照片增多后 data.json 体积增长，保存性能下降 | ❌ 未修复 |
 
@@ -646,18 +646,18 @@ function writeData(data) {
 | # | 问题 | 位置 | 说明 | 状态 |
 |---|------|------|------|------|
 | 12 | 本文档（TechnicalArchitecture.md）之前严重过时 | 本文件 | 已通过本次重写修复 | ✅ 已修复 |
-| 13 | PhotosPage 日期显示冗余 | PhotosPage.tsx L103 | 底部日期网格与 PhotoUploader 重复 | ❌ 未修复 |
-| 14 | Sidebar 底部信息硬编码 | Sidebar.tsx L102 | 不随 property 数据更新 | ❌ 未修复 |
-| 15 | DesignPage SpaceTab 状态标签硬编码 | DesignPage.tsx L522 | 应使用 statusLabels 常量 | ❌ 未修复 |
+| 13 | PhotosPage 日期显示冗余 | PhotosPage.tsx | 已移除冗余日期网格 | ✅ 已修复 |
+| 14 | Sidebar 底部信息硬编码 | Sidebar.tsx | 改用 useAppStore 动态数据 | ✅ 已修复 |
+| 15 | DesignPage SpaceTab 状态标签硬编码 | DesignPage.tsx | 改用 statusLabels 常量 | ✅ 已修复 |
 
 ### 7.4 样式/交互改进
 
 | # | 问题 | 位置 | 说明 | 状态 |
 |---|------|------|------|------|
-| 16 | 预算明细表移动端无滚动提示 | BudgetPage.tsx L611 | 用户可能不知道可以横向滚动 | ❌ 未修复 |
-| 17 | TopBar 移动端导入按钮无文字 | TopBar.tsx L130 | 只有图标，功能不明确 | ❌ 未修复 |
+| 16 | 预算明细表移动端无滚动提示 | BudgetPage.tsx | 已添加渐变遮罩提示 | ✅ 已修复 |
+| 17 | TopBar 移动端导入按钮无文字 | TopBar.tsx | 已添加"导入"文字标签 | ✅ 已修复 |
 | 18 | 色彩方案无法添加/删除色彩 | DesignPage.tsx L185 | 固定3色，无法扩展 | ❌ 未修复 |
-| 19 | ItemDetail 表单输入不统一 | ItemDetail.tsx | 部分用 FormField（有IME），部分用原生 input | ❌ 未修复 |
+| 19 | ItemDetail 表单输入不统一 | ItemDetail.tsx | 数字输入有特殊格式需求，经评估无需修改 | ✅ 无需修复 |
 | 20 | Dashboard 空数据状态引导不足 | Dashboard.tsx | 空清单时缺少明确引导 | ❌ 未修复 |
 
 ---
@@ -704,6 +704,14 @@ function writeData(data) {
 - [ ] 修改是否可能覆盖用户已填写的数据？
 - [ ] 发版前是否已执行 `node scripts/backup.js` 备份？
 - [ ] 发版后是否需要检查服务器数据是否丢失？
+
+### 8.7 修改安全原则（用户核心要求）
+
+1. **不引进新问题** — 修改前评估影响范围，修改后验证相关功能正常
+2. **满足真实需求** — 不为修改而修改，所有工作最终意义是让需求落地
+3. **考虑双端** — 系统同时存在 Web 和移动端，修改一个不能让另一个出错
+4. **不过度开发** — 满足现实使用需求即可，无需做到完美
+5. **不丢失数据** — 数据安全是红线，任何代码变更不能导致用户数据丢失
 
 ---
 
