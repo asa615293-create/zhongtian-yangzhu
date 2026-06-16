@@ -100,28 +100,20 @@ fieldKey 必须与 `src/data/deliveryFields.ts` 中定义的 key 完全匹配。
 
 prefix 对照：玄关 `door_`/`lock_`/`entrance_`、客餐厅 `living_`、厨房 `kitchen_`、主卧 `master_`、次卧 `second_`、书房 `study_`、主卫 `bath1_`、次卫 `bath2_`、公卫 `bath3_`、阳台 `balcony_`、三大件 `hvac_`/`floor_heating_`/`intercom_` 等
 
-## Mandatory Workflow (6 Steps)
+## Mandatory Workflow (5 Steps)
 
-### Step 1: Backup
+### Step 1: Fetch Current Server Data
 ```powershell
-node scripts/backup.js
+curl.exe -s https://zhongtian-yangzhu-production.up.railway.app/api/data | Out-File -Encoding utf8 backups/current-server.json
 ```
-Verify "备份完成!" in output. If fails, continue anyway (non-blocking).
+This is the source of truth. **Do NOT proceed if this fails.**
 
-### Step 2: Fetch Current Server Data
-```powershell
-curl.exe -s https://zhongtian-yangzhu-production.up.railway.app/api/data
-```
-Save to a local variable. This is the source of truth. **Do NOT proceed if this fails.**
+### Step 2: Prepare & Merge Data
 
-### Step 3: Prepare Import Data
-
-Based on user's request, prepare data to merge. Key rules:
+Based on user's request, prepare data to merge with the server data. Key rules:
 - deliverySpecs: 每个 spec 只有 7 个字段 (id, roomId, category, fieldKey, fieldLabel, value, notes)
 - furnishingItems: 完整的 FurnishingItem 结构
 - fieldKey 必须匹配 deliveryFields.ts 中的定义
-
-### Step 4: Smart Merge
 
 #### deliverySpecs 合并 (按 roomId + fieldKey):
 ```
@@ -152,31 +144,50 @@ For each new/update item:
 - designSchemes: Only add new, never modify existing
 - budgetTarget: Only update if user explicitly requests
 
-### Step 5: Upload Merged Data
+Write the merged data to `backups/merged-data.json`.
+
+### Step 3: Validate Data (MANDATORY — 脚本自动检查)
 ```powershell
-curl.exe -X PUT https://zhongtian-yangzhu-production.up.railway.app/api/data -H "Content-Type: application/json" -d "@prepared-data.json"
+node scripts/validate-data.js backups/merged-data.json
 ```
 
-**注意**：PUT 会替换整个 data.json。必须先下载当前数据，合并后再 PUT。
+**This script automatically checks:**
+- ✅ All deliverySpecs have exactly 7 fields (no brand/model/colorCode sub-fields)
+- ✅ All fieldKeys are present and non-empty
+- ✅ All roomId values are valid
+- ✅ No duplicate furnishingItem ids
+- ✅ Valid priority and status values
 
-### Step 6: Verify
+**If validation FAILS → STOP. Fix the data before proceeding. Never skip this step.**
+
+### Step 4: Safe Upload (自动备份+验证+上传+验证)
 ```powershell
-curl.exe -s https://zhongtian-yangzhu-production.up.railway.app/api/data
+node scripts/safe-upload.js backups/merged-data.json
 ```
-Check:
-- furnishingItems count >= previous count
-- deliverySpecs rooms count unchanged
-- No existing data was lost
-- No brand/model/colorCode sub-fields exist in any spec (these would be ignored by the system)
+
+**This script automatically:**
+1. Backs up current server data
+2. Validates the data file (re-runs validate-data.js)
+3. Uploads to server
+4. Verifies the upload succeeded
+5. Re-validates server data after upload
+
+**If any step fails → the script aborts. No partial uploads possible.**
+
+### Step 5: Verify Results
+```powershell
+node scripts/validate-data.js
+```
+(Run without arguments to validate the live server data.)
 
 If verification fails, restore from backup:
 ```powershell
-curl.exe -X PUT https://zhongtian-yangzhu-production.up.railway.app/api/data -H "Content-Type: application/json" -d "@backups/<backup-file>.json"
+node scripts/safe-upload.js backups/backup_<timestamp>.json
 ```
 
 ## Strict Rules
 
-1. **NEVER skip backup** — even for small changes
+1. **NEVER skip validation** — always run `node scripts/validate-data.js` before uploading
 2. **NEVER use brand/model/colorCode sub-fields** in deliverySpecs — they don't exist in the type
 3. **NEVER replace all data** — always merge with existing
 4. **NEVER overwrite user-entered data** — only fill empty fields
@@ -185,6 +196,7 @@ curl.exe -X PUT https://zhongtian-yangzhu-production.up.railway.app/api/data -H 
 7. **fieldKey must match deliveryFields.ts** — never invent new keys
 8. **Use `curl.exe` not `curl`** — PowerShell has alias conflict
 9. **Use `;` not `&&`** in PowerShell commands
+10. **Always use `node scripts/safe-upload.js`** for uploads — never use raw `curl.exe -X PUT` directly
 
 ## Project Context
 
@@ -194,5 +206,8 @@ curl.exe -X PUT https://zhongtian-yangzhu-production.up.railway.app/api/data -H 
 - **Field definitions**: src/data/deliveryFields.ts
 - **Store**: src/store/useAppStore.ts
 - **Server**: server/index.js (Express, port 3001)
-- **Backup script**: scripts/backup.js
+- **Scripts**:
+  - `scripts/backup.js` — 备份服务器数据到 backups/
+  - `scripts/validate-data.js` — 验证数据结构正确性
+  - `scripts/safe-upload.js` — 安全上传（备份+验证+上传+验证）
 - **MEMORY.md**: Contains confirmed brand choices and project history
