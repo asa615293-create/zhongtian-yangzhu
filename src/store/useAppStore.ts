@@ -628,6 +628,7 @@ interface AppData {
 
 interface AppStore extends AppData {
   loaded: boolean;
+  loadedPhotoRooms: Set<string>; // 已加载照片 base64Data 的房间
 
   // 房屋档案操作
   updateProperty: (data: Partial<PropertyInfo>) => void;
@@ -640,6 +641,7 @@ interface AppStore extends AppData {
   addPhoto: (roomId: string, photo: Photo) => void;
   removePhoto: (roomId: string, photoId: string) => void;
   updatePhoto: (roomId: string, photoId: string, data: Partial<Photo>) => void;
+  loadRoomPhotos: (roomId: string) => Promise<void>;
 
   // 尺寸测量操作
   addMeasurement: (roomId: string, measurement: Measurement) => void;
@@ -684,16 +686,12 @@ const defaultProperty: PropertyInfo = {
 };
 
 function triggerSave(state: AppData) {
-  // 剥离照片 base64Data（照片已存为服务器文件，无需重复传输）
-  const strippedPhotos: Record<string, Photo[]> = {};
-  for (const [roomId, photos] of Object.entries(state.photos)) {
-    strippedPhotos[roomId] = photos.map(({ base64Data, ...rest }) => rest as Photo);
-  }
+  // 直接保存完整数据（包含 base64Data）
   const data: AppData = {
     property: state.property,
     rooms: state.rooms,
     deliverySpecs: state.deliverySpecs,
-    photos: strippedPhotos,
+    photos: state.photos,
     measurements: state.measurements,
     furnishingItems: state.furnishingItems,
     designSchemes: state.designSchemes,
@@ -704,6 +702,7 @@ function triggerSave(state: AppData) {
 
 export const useAppStore = create<AppStore>()((set, get) => ({
   loaded: false,
+  loadedPhotoRooms: new Set<string>(),
   property: defaultProperty,
   rooms: defaultRooms,
   deliverySpecs: {},
@@ -738,6 +737,28 @@ export const useAppStore = create<AppStore>()((set, get) => ({
       console.error('从服务器加载数据失败，使用本地默认值:', err);
     }
     set({ loaded: true });
+  },
+
+  // 按需加载指定房间的照片 base64Data
+  loadRoomPhotos: async (roomId: string) => {
+    const state = get();
+    if (state.loadedPhotoRooms.has(roomId)) return;
+
+    try {
+      const res = await fetch(`${API_BASE}/api/photos/${roomId}`);
+      if (res.ok) {
+        const roomPhotos: Photo[] = await res.json();
+        set((state) => ({
+          photos: {
+            ...state.photos,
+            [roomId]: roomPhotos,
+          },
+          loadedPhotoRooms: new Set([...state.loadedPhotoRooms, roomId]),
+        }));
+      }
+    } catch (err) {
+      console.error(`加载房间 ${roomId} 照片失败:`, err);
+    }
   },
 
   // 房屋档案操作
@@ -926,16 +947,12 @@ export const useAppStore = create<AppStore>()((set, get) => ({
   // 数据导入导出
   exportData: () => {
     const state = get();
-    // 剥离照片 base64Data（照片已存为服务器文件）
-    const strippedPhotos: Record<string, Photo[]> = {};
-    for (const [roomId, photos] of Object.entries(state.photos)) {
-      strippedPhotos[roomId] = photos.map(({ base64Data, ...rest }) => rest as Photo);
-    }
+    // 导出完整数据（包含 base64Data）
     const exportObj = {
       property: state.property,
       rooms: state.rooms,
       deliverySpecs: state.deliverySpecs,
-      photos: strippedPhotos,
+      photos: state.photos,
       measurements: state.measurements,
       furnishingItems: state.furnishingItems,
       designSchemes: state.designSchemes,
@@ -1025,16 +1042,12 @@ if (typeof window !== 'undefined') {
     if (saveTimer) {
       clearTimeout(saveTimer);
       const state = useAppStore.getState();
-      // 剥离照片 base64Data
-      const strippedPhotos: Record<string, Photo[]> = {};
-      for (const [roomId, photos] of Object.entries(state.photos)) {
-        strippedPhotos[roomId] = photos.map(({ base64Data, ...rest }) => rest as Photo);
-      }
+      // 直接保存完整数据（包含 base64Data）
       const data = JSON.stringify({
         property: state.property,
         rooms: state.rooms,
         deliverySpecs: state.deliverySpecs,
-        photos: strippedPhotos,
+        photos: state.photos,
         measurements: state.measurements,
         furnishingItems: state.furnishingItems,
         designSchemes: state.designSchemes,

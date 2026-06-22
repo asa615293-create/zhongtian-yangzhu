@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { Camera, Calendar } from 'lucide-react';
 import { useAppStore } from '@/store/useAppStore';
 import type { Photo } from '@/types';
@@ -6,15 +6,13 @@ import PhotoUploader from '@/components/common/PhotoUploader';
 import ImageLightbox from '@/components/common/ImageLightbox';
 import Card from '@/components/common/Card';
 
-// API 基础地址
-const API_BASE = import.meta.env.VITE_API_URL || '';
-
 const PhotosPage: React.FC = () => {
   const rooms = useAppStore((s) => s.rooms);
   const photos = useAppStore((s) => s.photos);
   const addPhoto = useAppStore((s) => s.addPhoto);
   const removePhoto = useAppStore((s) => s.removePhoto);
   const updatePhoto = useAppStore((s) => s.updatePhoto);
+  const loadRoomPhotos = useAppStore((s) => s.loadRoomPhotos);
 
   const [activeRoomId, setActiveRoomId] = useState(rooms[0]?.id || 'entrance');
   const [lightboxPhotoId, setLightboxPhotoId] = useState<string | null>(null);
@@ -27,15 +25,21 @@ const PhotosPage: React.FC = () => {
     takenDate: p.takenDate,
   }));
 
-  // 新上传：PhotoUploader 完成文件上传后，只添加元数据到 store
+  // 切换房间时，按需加载该房间的照片 base64Data
+  useEffect(() => {
+    loadRoomPhotos(activeRoomId);
+  }, [activeRoomId, loadRoomPhotos]);
+
+  // 新上传：PhotoUploader 传入照片数据（含 base64Data），补充 roomId 和 category
   const handleAdd = useCallback(
-    (photoId: string, notes: string, takenDate: string) => {
+    (photoData: Pick<Photo, 'id' | 'base64Data' | 'notes' | 'takenDate'>) => {
       const newPhoto: Photo = {
-        id: photoId,
+        id: photoData.id,
         roomId: activeRoomId,
         category: '实景',
-        takenDate,
-        notes,
+        base64Data: photoData.base64Data,
+        takenDate: photoData.takenDate,
+        notes: photoData.notes,
       };
       addPhoto(activeRoomId, newPhoto);
     },
@@ -63,6 +67,11 @@ const PhotosPage: React.FC = () => {
   const handleLightboxClose = useCallback(() => {
     setLightboxPhotoId(null);
   }, []);
+
+  // 获取灯箱显示的照片 base64Data
+  const lightboxPhoto = lightboxPhotoId
+    ? roomPhotos.find((p) => p.id === lightboxPhotoId)
+    : null;
 
   return (
     <div className="fade-in">
@@ -114,10 +123,10 @@ const PhotosPage: React.FC = () => {
         />
       </Card>
 
-      {/* 大图灯箱 */}
-      {lightboxPhotoId && (
+      {/* 大图灯箱 - 使用 base64Data 直接显示 */}
+      {lightboxPhotoId && lightboxPhoto?.base64Data && (
         <ImageLightbox
-          src={`${API_BASE}/api/photos/${lightboxPhotoId}`}
+          src={lightboxPhoto.base64Data}
           alt="照片大图"
           onClose={handleLightboxClose}
         />
