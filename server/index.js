@@ -92,23 +92,7 @@ function stripPhotosBase64(data) {
   return stripped;
 }
 
-// ─── 外部 API 鉴权中间件 ───
-// API Key 通过环境变量 EXTERNAL_API_KEY 设置
-// 请求时通过 Authorization: Bearer <key> 或 ?key=<key> 传递
-const EXTERNAL_API_KEY = process.env.EXTERNAL_API_KEY || '';
-
-function requireApiKey(req, res, next) {
-  if (!EXTERNAL_API_KEY) {
-    return res.status(503).json({ ok: false, error: '外部 API 未启用（未设置 EXTERNAL_API_KEY 环境变量）' });
-  }
-  const authHeader = req.headers.authorization;
-  const bearerKey = authHeader?.startsWith('Bearer ') ? authHeader.slice(7) : '';
-  const queryKey = req.query.key || '';
-  if (bearerKey === EXTERNAL_API_KEY || queryKey === EXTERNAL_API_KEY) {
-    return next();
-  }
-  return res.status(401).json({ ok: false, error: '无效的 API Key' });
-}
+// ─── 外部 API（公开访问，无需鉴权） ───
 
 // ─── 内部 API 路由 ───
 
@@ -190,12 +174,11 @@ app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
 
-// ─── 外部 API 路由（供 ChatGPT 等 AI 工具调用） ───
-// 所有外部 API 路径以 /api/external/ 开头，需要 API Key 鉴权
-// 鉴权方式：Authorization: Bearer <key> 或 ?key=<key>
+// ─── 外部 API 路由（供 ChatGPT 等 AI 工具调用，公开访问） ───
+// 所有外部 API 路径以 /api/external/ 开头，无需鉴权
 
 // GET /api/external/data - 获取全部数据（含照片 base64Data，完整数据）
-app.get('/api/external/data', requireApiKey, (req, res) => {
+app.get('/api/external/data', (req, res) => {
   const data = readData();
   if (data) {
     res.json(data);
@@ -205,7 +188,7 @@ app.get('/api/external/data', requireApiKey, (req, res) => {
 });
 
 // GET /api/external/summary - 获取数据摘要（不含照片 base64，快速概览）
-app.get('/api/external/summary', requireApiKey, (req, res) => {
+app.get('/api/external/summary', (req, res) => {
   const data = readData();
   if (!data) {
     return res.json({});
@@ -247,7 +230,7 @@ app.get('/api/external/summary', requireApiKey, (req, res) => {
 });
 
 // GET /api/external/rooms - 获取所有房间列表及各房间数据概览
-app.get('/api/external/rooms', requireApiKey, (req, res) => {
+app.get('/api/external/rooms', (req, res) => {
   const data = readData();
   if (!data) {
     return res.json([]);
@@ -278,7 +261,7 @@ app.get('/api/external/rooms', requireApiKey, (req, res) => {
 });
 
 // GET /api/external/room/:roomId - 获取指定房间完整数据（含照片 base64）
-app.get('/api/external/room/:roomId', requireApiKey, (req, res) => {
+app.get('/api/external/room/:roomId', (req, res) => {
   const data = readData();
   if (!data) {
     return res.json({});
@@ -297,7 +280,7 @@ app.get('/api/external/room/:roomId', requireApiKey, (req, res) => {
 });
 
 // PUT /api/external/delivery-specs/:roomId - 更新指定房间的交付标准
-app.put('/api/external/delivery-specs/:roomId', requireApiKey, (req, res) => {
+app.put('/api/external/delivery-specs/:roomId', (req, res) => {
   const data = readData();
   if (!data) {
     return res.status(404).json({ ok: false, error: '服务器无数据' });
@@ -323,7 +306,7 @@ app.put('/api/external/delivery-specs/:roomId', requireApiKey, (req, res) => {
 });
 
 // PATCH /api/external/delivery-specs/:roomId - 部分更新交付标准（按 fieldKey 匹配合并）
-app.patch('/api/external/delivery-specs/:roomId', requireApiKey, (req, res) => {
+app.patch('/api/external/delivery-specs/:roomId', (req, res) => {
   const data = readData();
   if (!data) {
     return res.status(404).json({ ok: false, error: '服务器无数据' });
@@ -364,7 +347,7 @@ app.patch('/api/external/delivery-specs/:roomId', requireApiKey, (req, res) => {
 });
 
 // PUT /api/external/furnishing-items - 替换全部软装清单
-app.put('/api/external/furnishing-items', requireApiKey, (req, res) => {
+app.put('/api/external/furnishing-items', (req, res) => {
   const data = readData();
   if (!data) {
     return res.status(404).json({ ok: false, error: '服务器无数据' });
@@ -387,7 +370,7 @@ app.put('/api/external/furnishing-items', requireApiKey, (req, res) => {
 });
 
 // PATCH /api/external/furnishing-items - 部分更新软装清单（按 id 匹配更新，无 id 则新增）
-app.patch('/api/external/furnishing-items', requireApiKey, (req, res) => {
+app.patch('/api/external/furnishing-items', (req, res) => {
   const data = readData();
   if (!data) {
     return res.status(404).json({ ok: false, error: '服务器无数据' });
@@ -429,7 +412,7 @@ app.patch('/api/external/furnishing-items', requireApiKey, (req, res) => {
 });
 
 // POST /api/external/photos/:roomId - 为指定房间添加照片
-app.post('/api/external/photos/:roomId', requireApiKey, (req, res) => {
+app.post('/api/external/photos/:roomId', (req, res) => {
   const data = readData();
   if (!data) {
     return res.status(404).json({ ok: false, error: '服务器无数据' });
@@ -465,7 +448,7 @@ app.post('/api/external/photos/:roomId', requireApiKey, (req, res) => {
 });
 
 // PUT /api/external/photos/:roomId - 替换指定房间的全部照片
-app.put('/api/external/photos/:roomId', requireApiKey, (req, res) => {
+app.put('/api/external/photos/:roomId', (req, res) => {
   const data = readData();
   if (!data) {
     return res.status(404).json({ ok: false, error: '服务器无数据' });
@@ -495,7 +478,7 @@ app.put('/api/external/photos/:roomId', requireApiKey, (req, res) => {
 });
 
 // PUT /api/external/measurements/:roomId - 更新指定房间的测量数据
-app.put('/api/external/measurements/:roomId', requireApiKey, (req, res) => {
+app.put('/api/external/measurements/:roomId', (req, res) => {
   const data = readData();
   if (!data) {
     return res.status(404).json({ ok: false, error: '服务器无数据' });
@@ -517,7 +500,7 @@ app.put('/api/external/measurements/:roomId', requireApiKey, (req, res) => {
 });
 
 // PUT /api/external/property-info - 更新房屋信息
-app.put('/api/external/property-info', requireApiKey, (req, res) => {
+app.put('/api/external/property-info', (req, res) => {
   const data = readData();
   if (!data) {
     return res.status(404).json({ ok: false, error: '服务器无数据' });
@@ -535,7 +518,7 @@ app.put('/api/external/property-info', requireApiKey, (req, res) => {
 });
 
 // GET /api/external/schema - 获取数据结构说明（帮助 AI 理解数据格式）
-app.get('/api/external/schema', requireApiKey, (req, res) => {
+app.get('/api/external/schema', (req, res) => {
   res.json({
     propertyInfo: {
       description: '房屋基本信息',
