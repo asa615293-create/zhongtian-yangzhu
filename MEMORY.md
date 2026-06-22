@@ -163,6 +163,15 @@ src/
   - 发版后必须检查服务器数据是否丢失（Railway 重建容器会清空 data.json），若丢失则从备份恢复
   - 用户可随时手动执行 `node scripts/backup.js` 备份数据到本地
   - 备份文件格式：`backups/backup_YYYY-MM-DD_HH-mm-ss.json`，自动清理30天以上的旧备份
+  - 恢复数据使用 `node scripts/restore.js [备份文件路径]`
+- **部署数据安全红线（血泪教训，对话11）**：
+  - **Railway 每次部署会重建容器，清空整个文件系统**（包括 data.json 和所有文件）
+  - **绝对不能把照片等用户数据存为独立文件**（photos/ 目录），容器重建后全部丢失
+  - **照片必须以 base64Data 存储在 data.json 中**，data.json 必须放在 Railway Volume 挂载点上
+  - **PUT /api/data 必须保存完整数据（含 base64Data）**，绝不能在保存时剥离任何用户数据
+  - **GET /api/data 可以剥离 base64Data 加速响应**，但存储的数据必须完整
+  - **每次发版后必须验证服务器数据完整性**，如果数据丢失立即执行 `node scripts/restore.js` 恢复
+  - **任何涉及数据存储架构的改动，必须先备份再实施**
 - **系统配置红线**：
   - **绝对不能修改系统级配置**（全局 git config、Windows 凭证、环境变量等），只能用 `git config --local` 修改项目级配置
   - 这是工作电脑，环境不允许随意改动
@@ -321,23 +330,37 @@ src/
 - **已完成**：
   - **备份服务器数据**：backup_2026-06-22_09-11-56.json（38MB，80张照片）
   - **创建现场实拍图文件夹**：按9个区域（玄关/客餐厅/厨房/主卧/次卧/书房/主卫/次卫/公卫/阳台）创建子文件夹，80张照片以备注命名导出为 jpg 文件
-  - **照片存储架构重构**（核心优化）：
-    - 服务端新增照片文件存储：`{DATA_DIR}/photos/{id}.jpg` + `{id}_thumb.jpg`
-    - 新增 API 端点：`POST /api/photos/upload`、`GET /api/photos/:id`、`GET /api/photos/:id/thumbnail`、`DELETE /api/photos/:id`
-    - 服务端启动时自动迁移：将 data.json 中的 base64Data 转为文件并剥离
-    - `GET /api/data` 自动剥离 base64Data，响应从 38MB 降到 ~64KB
-    - `PUT /api/data` 自动剥离 base64Data（安全兜底）
-  - **前端照片组件重构**：
-    - PhotoUploader：上传走新 API（原图+缩略图分别生成），显示用服务端 URL
-    - 新增 `generateThumbnail` 工具函数：300px 宽、0.6 质量缩略图
-    - 新增 `ImageLightbox` 组件：全屏大图查看，支持 ESC/点击/下滑关闭
-    - PhotosPage：集成灯箱，点击照片查看大图
-  - **Store 优化**：triggerSave/exportData/beforeunload 均剥离 base64Data，保存负载从 38MB 降到 ~100KB
-  - **Photo 类型更新**：base64Data 改为可选字段（仅迁移兼容用）
-  - **.gitignore / .dockerignore 更新**：排除 photos/、backups/、现场实拍图/、房屋图片/
+  - **新增 ImageLightbox 组件**：全屏大图查看，支持 ESC/点击/下滑关闭
+  - **新增 generateThumbnail 工具函数**：客户端生成缩略图用于列表展示
   - **scripts/extract-photos.cjs**：从备份数据提取照片到本地文件夹的工具脚本
-- **性能提升**：data.json 从 38MB → 108KB（缩小 350 倍），API 响应从 38MB → 64KB
-- **迁移照片缩略图说明**：迁移时缩略图是原图副本（较大），新上传的照片会有真正的缩略图（~5-10KB）
+
+### 2026-06-22 对话 11（部署数据丢失修复 + 照片架构回退）
+
+- **用户诉求**：更新后服务器数据全部丢失（精装修交付标准大部分消失、照片看不到），每次发版都会导致数据出错
+- **问题根因（严重教训）**：
+  - **上一次的"照片文件分离"方案是错误的**：把 base64Data 从 data.json 迁移到 photos/ 目录的文件中，但 Railway 每次部署重建容器会清空整个文件系统（包括 photos/ 和 data.json）
+  - **migratePhotos() 在启动时剥离 base64Data 并删除**：容器重建后文件丢失，data.json 中的 base64Data 也已被删除 → 数据双重丢失
+  - **前端 triggerSave 也剥离 base64Data**：即使数据在内存中，保存时也会丢失照片数据
+  - **根本原因**：Railway 免费版没有持久化 Volume，容器重建 = 数据全丢
+- **已完成**：
+  - **回退照片存储架构**：照片重新以 base64Data 存储在 data.json 中（不再分离为文件）
+  - **服务端新增自动备份**：每次写入前自动备份，保留最近5个（`createBackup()`）
+  - **服务端新增 API**：
+    - `GET /api/data` — 返回剥离 base64Data 的数据（快速加载，约200KB）
+    - `GET /api/photos/:roomId` — 按需加载指定房间完整照片数据（含 base64Data）
+    - `PUT /api/data` — 完整保存数据（不剥离 base64Data）
+    - `POST /api/data/restore` — 从上传 JSON 恢复数据
+    - `DELETE /api/photos/:photoId` — 删除指定照片
+  - **前端照片按需加载**：切换房间时才加载该房间的照片 base64Data（`loadRoomPhotos`）
+  - **前端不再剥离 base64Data**：triggerSave/exportData/beforeunload 均保存完整数据
+  - **PhotoUploader 回退**：照片直接以 base64Data 存入 store，不再调服务器上传 API
+  - **新增恢复脚本**：`scripts/restore.js`，从备份文件恢复数据到服务器
+  - **express.json limit 提升到 200mb**
+- **照片加载优化策略**：
+  - 初始加载：GET /api/data 不含 base64Data（~200KB，秒开）
+  - 按需加载：切换到某房间时，GET /api/photos/:roomId 加载该房间照片
+  - 保存：PUT /api/data 保存完整数据（含 base64Data）
+  - 灯箱：直接使用 store 中的 base64Data 显示大图
 
 ## 已部署信息
 
@@ -506,8 +529,19 @@ entrance=玄关, living=客餐厅, kitchen=厨房, masterBedroom=主卧, secondB
 - [ ] 移动端删除按钮是否使用了 `md:opacity-0 md:group-hover:opacity-100`？
 - [ ] 新增 input 是否绑定了 IME 事件？
 - [ ] falsy 值是否使用了 `??` 而非 `||`？
+- [ ] **改动是否涉及数据存储？如果涉及，是否会导致部署后数据丢失？**
+- [ ] **PUT /api/data 是否完整保存数据（不剥离 base64Data 等用户数据）？**
+- [ ] **照片数据是否仍然以 base64Data 存储在 data.json 中（不能存为独立文件）？**
 
-### 5. 修改安全原则（用户核心要求）
+### 5. 部署流程检查清单（每次发版必做）
+
+1. **发版前**：`node scripts/backup.js` 备份服务器数据
+2. **发版前**：`npm run build` 确保构建成功
+3. **发版后**：访问 `/api/health` 确认服务正常
+4. **发版后**：访问页面确认数据完整（交付标准、照片、软装清单）
+5. **如果数据丢失**：`node scripts/restore.js backups/最新备份文件.json` 恢复
+
+### 6. 修改安全原则（用户核心要求）
 
 1. **每个修改都需确认不会引进新的问题** — 修改前评估影响范围，修改后验证相关功能正常
 2. **每个修改均须满足真实需求** — 不为修改而修改，不为存在而存在，所有工作内容最终意义是让需求落地
@@ -537,39 +571,16 @@ entrance=玄关, living=客餐厅, kitchen=厨房, masterBedroom=主卧, secondB
 2. **绝对不要修改全局 git config** — 只能操作本项目的 local config
 3. **只有本项目用私人账号，其他项目都用原来的全局账号**
 
-### 推送会失败的原因
+### 推送流程（AI 自主执行，不推给用户）
 
-终端沙箱网络不稳定（SSL 连接超时），且 Windows 凭证管理器缓存了旧账号凭证，直接推送会用错误账号认证失败。
+**AI 必须自主完成整个 push 流程，不要让用户手动操作。**
 
-### 正确推送方式
+1. `git add` 暂存变更文件
+2. `git commit` 提交
+3. `git push origin main` 推送（沙箱网络不稳定时重试，最多 5 次）
+4. 如果沙箱终端持续失败（SSL 超时等网络问题），再由用户在自己的终端执行
 
-**必须由用户在自己的终端（非 Trae 终端）执行：**
-
-```powershell
-cd "C:\Users\Administrator\Desktop\装\中天央著装修方案"
-git push origin main
-```
-
-### 如果遇到认证失败
-
-两种解决方式：
-
-**方式A：清除旧凭证**
-
-1. 控制面板 → 凭据管理器 → Windows 凭据
-2. 找到所有 `github.com` 条目，全部删除
-3. 重新执行 `git push`，会弹出浏览器登录
-
-**方式B：用 Personal Access Token**
-
-1. 打开 https://github.com/settings/tokens?type=beta
-2. 生成 token，权限勾选 Contents 的 Read and write
-3. 执行：
-
-```powershell
-git remote set-url origin https://asa615293-create:你的token@github.com/asa615293-create/zhongtian-yangzhu.git
-git push origin main
-```
+**⚠️ Windows 凭证管理器中的 GitHub 凭证属于全局账号（wangjingbo），AI 推送时会弹出认证窗口让用户登录本项目账号（asa615293-create），这是正常流程。**
 
 ### Railway 自动部署
 
