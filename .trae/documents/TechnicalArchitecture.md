@@ -48,7 +48,8 @@
 | 字体 | Google Fonts | Cormorant Garamond（展示）+ DM Sans（界面） |
 | 后端 | Express | 单文件 server/index.js |
 | 部署 | Docker + Railway | Dockerfile 单服务部署 |
-| 图片处理 | Canvas API 压缩 | 最大 1920px，质量 0.8，上限 2MB |
+| 图片处理 | Canvas API 压缩 | 原图最大 1920px/0.8 质量/2MB；缩略图最大 300px/0.6 质量 |
+| 图片存储 | 服务端文件存储 | 照片存为独立文件（非 base64），缩略图+原图分离 |
 
 ### 1.3 路由定义
 
@@ -119,10 +120,14 @@ interface Photo {
   id: string;
   roomId: string;
   category: string;    // 固定为 '实景'
-  base64Data: string;  // 压缩后的 Base64
+  base64Data?: string; // ⚠️ 已废弃，仅迁移兼容用。新照片不再使用此字段
   takenDate: string;   // YYYY-MM-DD
   notes: string;
 }
+// 照片文件存储在服务端：{PHOTOS_DIR}/{id}.jpg（原图）+ {id}_thumb.jpg（缩略图）
+// 前端通过 API URL 加载图片：<img src="/api/photos/{id}/thumbnail">
+// 点击查看大图：<img src="/api/photos/{id}">
+// Store 中不存储 base64Data，triggerSave/exportData 均自动剥离
 
 // ─── Measurement ───
 interface Measurement {
@@ -596,15 +601,20 @@ const handleBoardTypeChange = (boardType: string) => {
 
 | 方法 | 路径 | 说明 |
 |------|------|------|
-| GET | /api/data | 获取全部数据 |
-| PUT | /api/data | 保存全部数据（全量替换） |
+| GET | /api/data | 获取全部数据（照片不含 base64Data） |
+| PUT | /api/data | 保存全部数据（自动剥离照片 base64Data） |
 | GET | /api/health | 健康检查 |
+| POST | /api/photos/upload | 上传照片（body: {roomId, id, notes, takenDate, imageData, thumbnailData}） |
+| GET | /api/photos/:photoId | 获取原图文件 |
+| GET | /api/photos/:photoId/thumbnail | 获取缩略图文件（回退到原图） |
+| DELETE | /api/photos/:photoId | 删除照片文件（原图+缩略图） |
 
 ### 6.2 数据文件
 
-- 开发环境：`server/data.json`
-- 生产环境：`/app/data/data.json`（Railway Volume 挂载点）
+- 开发环境：`server/data.json`（元数据）+ `server/photos/`（照片文件）
+- 生产环境：`/app/data/data.json`（Railway Volume）+ `/app/data/photos/`（照片文件）
 - 启动时自动迁移：如果持久化目录无数据但本地有，自动复制
+- 启动时自动迁移照片：如果 data.json 中照片含 base64Data，转为文件并剥离
 
 ### 6.3 原子写入
 
@@ -639,7 +649,7 @@ function writeData(data) {
 | 8 | importData 合并策略不一致 | useAppStore.ts L939 | deliverySpecs/photos 按房间全量替换可能丢数据 | ✅ 已修复（2.4 安全合并策略 + safe-upload.js） |
 | 9 | 自动保存无 beforeunload 保护 | useAppStore.ts | 已添加 beforeunload 同步 XHR 保存 | ✅ 已修复 |
 | 10 | 服务端无并发保护和数据校验 | server/index.js L58 | 多设备同时修改互相覆盖；API 无认证 | ❌ 未修复 |
-| 11 | 图片数据膨胀隐患 | 全局 | 照片增多后 data.json 体积增长，保存性能下降 | ❌ 未修复 |
+| 11 | 图片数据膨胀隐患 | 全局 | 照片已改为文件存储，data.json 不再含 base64Data | ✅ 已修复 |
 
 ### 7.3 冗余/过时内容
 

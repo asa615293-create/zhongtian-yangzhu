@@ -36,7 +36,7 @@ export interface Photo {
   id: string;
   roomId: string;
   category: string;
-  base64Data: string;
+  base64Data?: string; // 已废弃，仅迁移兼容用。新照片不再使用此字段
   takenDate: string;
   notes: string;
 }

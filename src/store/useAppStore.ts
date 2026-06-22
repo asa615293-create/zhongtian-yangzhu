@@ -684,11 +684,16 @@ const defaultProperty: PropertyInfo = {
 };
 
 function triggerSave(state: AppData) {
+  // 剥离照片 base64Data（照片已存为服务器文件，无需重复传输）
+  const strippedPhotos: Record<string, Photo[]> = {};
+  for (const [roomId, photos] of Object.entries(state.photos)) {
+    strippedPhotos[roomId] = photos.map(({ base64Data, ...rest }) => rest as Photo);
+  }
   const data: AppData = {
     property: state.property,
     rooms: state.rooms,
     deliverySpecs: state.deliverySpecs,
-    photos: state.photos,
+    photos: strippedPhotos,
     measurements: state.measurements,
     furnishingItems: state.furnishingItems,
     designSchemes: state.designSchemes,
@@ -921,11 +926,16 @@ export const useAppStore = create<AppStore>()((set, get) => ({
   // 数据导入导出
   exportData: () => {
     const state = get();
+    // 剥离照片 base64Data（照片已存为服务器文件）
+    const strippedPhotos: Record<string, Photo[]> = {};
+    for (const [roomId, photos] of Object.entries(state.photos)) {
+      strippedPhotos[roomId] = photos.map(({ base64Data, ...rest }) => rest as Photo);
+    }
     const exportObj = {
       property: state.property,
       rooms: state.rooms,
       deliverySpecs: state.deliverySpecs,
-      photos: state.photos,
+      photos: strippedPhotos,
       measurements: state.measurements,
       furnishingItems: state.furnishingItems,
       designSchemes: state.designSchemes,
@@ -1015,11 +1025,16 @@ if (typeof window !== 'undefined') {
     if (saveTimer) {
       clearTimeout(saveTimer);
       const state = useAppStore.getState();
+      // 剥离照片 base64Data
+      const strippedPhotos: Record<string, Photo[]> = {};
+      for (const [roomId, photos] of Object.entries(state.photos)) {
+        strippedPhotos[roomId] = photos.map(({ base64Data, ...rest }) => rest as Photo);
+      }
       const data = JSON.stringify({
         property: state.property,
         rooms: state.rooms,
         deliverySpecs: state.deliverySpecs,
-        photos: state.photos,
+        photos: strippedPhotos,
         measurements: state.measurements,
         furnishingItems: state.furnishingItems,
         designSchemes: state.designSchemes,

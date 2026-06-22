@@ -3,7 +3,11 @@ import { Camera, Calendar } from 'lucide-react';
 import { useAppStore } from '@/store/useAppStore';
 import type { Photo } from '@/types';
 import PhotoUploader from '@/components/common/PhotoUploader';
+import ImageLightbox from '@/components/common/ImageLightbox';
 import Card from '@/components/common/Card';
+
+// API 基础地址
+const API_BASE = import.meta.env.VITE_API_URL || '';
 
 const PhotosPage: React.FC = () => {
   const rooms = useAppStore((s) => s.rooms);
@@ -13,6 +17,7 @@ const PhotosPage: React.FC = () => {
   const updatePhoto = useAppStore((s) => s.updatePhoto);
 
   const [activeRoomId, setActiveRoomId] = useState(rooms[0]?.id || 'entrance');
+  const [lightboxPhotoId, setLightboxPhotoId] = useState<string | null>(null);
 
   const currentRoom = rooms.find((r) => r.id === activeRoomId);
   const roomPhotos = (photos[activeRoomId] || []).map((p) => ({
@@ -22,15 +27,15 @@ const PhotosPage: React.FC = () => {
     takenDate: p.takenDate,
   }));
 
+  // 新上传：PhotoUploader 完成文件上传后，只添加元数据到 store
   const handleAdd = useCallback(
-    (base64Data: string) => {
+    (photoId: string, notes: string, takenDate: string) => {
       const newPhoto: Photo = {
-        id: `photo-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+        id: photoId,
         roomId: activeRoomId,
         category: '实景',
-        base64Data,
-        takenDate: new Date().toISOString().split('T')[0],
-        notes: '',
+        takenDate,
+        notes,
       };
       addPhoto(activeRoomId, newPhoto);
     },
@@ -51,6 +56,14 @@ const PhotosPage: React.FC = () => {
     [activeRoomId, updatePhoto]
   );
 
+  const handleLightboxOpen = useCallback((photoId: string) => {
+    setLightboxPhotoId(photoId);
+  }, []);
+
+  const handleLightboxClose = useCallback(() => {
+    setLightboxPhotoId(null);
+  }, []);
+
   return (
     <div className="fade-in">
       {/* Page Header */}
@@ -59,7 +72,7 @@ const PhotosPage: React.FC = () => {
           <Camera className="w-6 h-6 text-accent" />
           <h1 className="section-title">实景照片</h1>
         </div>
-        <p className="section-subtitle ml-9">按空间上传实景照片</p>
+        <p className="section-subtitle ml-9">按空间上传实景照片，点击照片查看大图</p>
       </div>
 
       <div className="gold-divider mb-6" />
@@ -97,8 +110,18 @@ const PhotosPage: React.FC = () => {
           onRemove={handleRemove}
           onUpdateNotes={handleUpdateNotes}
           category={currentRoom?.name}
+          onLightboxOpen={handleLightboxOpen}
         />
       </Card>
+
+      {/* 大图灯箱 */}
+      {lightboxPhotoId && (
+        <ImageLightbox
+          src={`${API_BASE}/api/photos/${lightboxPhotoId}`}
+          alt="照片大图"
+          onClose={handleLightboxClose}
+        />
+      )}
     </div>
   );
 };

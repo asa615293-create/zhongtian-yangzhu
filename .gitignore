@@ -2,6 +2,10 @@ node_modules/
 dist/
 server/node_modules/
 server/data.json
+server/photos/
+backups/
+现场实拍图/
+房屋图片/
 .env
 *.local
 .DS_Store
